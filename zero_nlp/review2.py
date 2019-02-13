@@ -6,8 +6,12 @@ Created on Tue Feb 12 16:23:47 2019
 '''
 import numpy as np
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
 class Relu:
     def __init__(self):
+        self.params = []
         self.mask = None
 
     def forward(self, x):
@@ -19,6 +23,20 @@ class Relu:
     def backward(self, dy):
         dx = dy.copy()
         dx[self.mask] = 0  # 0以下は0
+        return dx
+
+class Sigmoid:
+    def __init__(self):
+        self.params = []
+        self.y = None
+
+    def forward(self, x):
+        y = sigmoid(x)
+        self.y = y
+        return y
+
+    def backward(self, dy):
+        dx = self.y * (1 - self.y) * dy
         return dx
 
 if __name__ == '__main__':
