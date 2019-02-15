@@ -51,6 +51,7 @@ def cross_entropy_error_text(y, t):
 class Sigmoid:
     def __init__(self):
         self.params = []
+        self.grads = []
         self.y = None
 
     def forward(self, x):
@@ -65,6 +66,7 @@ class Sigmoid:
 class Relu:
     def __init__(self):
         self.params = []
+        self.grads = []
         self.mask = None
 
     def forward(self, x):
@@ -82,14 +84,29 @@ class Affine:
     ''' 全結合層 '''
     def __init__(self, w, b):
         self.params = [w, b]
+        self.grads = [np.zeros_like(w), np.zeros_like(b)]
+        self.x = None
 
     def forward(self, x):
         w, b = self.params
-        return np.dot(x, w) + b
+        self.x = x
+        y = np.dot(x, w) + b
+        return y
+
+    def backward(self, dy):
+        w, b = self.params
+        dx = np.dot(dy, w.T)
+        dw = np.dot(self.x.T, dy)
+        db = np.sum(dy, axis=0)
+
+        self.grads[0][...] = dw
+        self.grads[1][...] = db
+        return dx
 
 class Softmax:
     def __init__(self):
         self.params = []
+        self.grads = []
 
     def forward(self, x):
         return softmax(x)
@@ -97,6 +114,7 @@ class Softmax:
 class SoftmaxWithLoss:
     def __init__(self):
         self.params = []
+        self.grads = []
         self.y = None  # softmax出力
         self.t = None  # 教師ラベル
 
@@ -132,6 +150,7 @@ class TwoLayersNet:
 
 if __name__=='__main__':
 
+    """
     x = np.random.randn(10,3)
     print(x)
 
@@ -144,7 +163,7 @@ if __name__=='__main__':
 
     dx = relu_layer.backward(dy)
     print(dx)
-
+    """
     """
     x = np.random.randn(10,3)
     y = softmax(x)
@@ -167,9 +186,15 @@ if __name__=='__main__':
     print('tがラベル:', t_lbl)
     print('自作    :', cross_entropy_error(y, t_lbl))
     print('テキスト:', cross_entropy_error_text(y, t_lbl))
-    #x = np.random.randn(10, 2)
-    #model = TwoLayersNet(2, 4, 3)
-    #result = model.predict(x)
-    #print(result)
     """
+    x = np.random.randn(10, 2)
+    model = TwoLayersNet(2, 4, 3)
+    print(model.params)
+    print()
+    for i in range(len(model.layers)):
+        print(i, model.layers[i].params)
+        print()
+
+    score = model.predict(x)
+    print(score)
 
