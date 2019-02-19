@@ -124,6 +124,11 @@ class SoftmaxWithLoss:
         loss = cross_entropy_error(self.y, self.t)
         return loss
 
+    def backward(self, dl):
+        n = len(self.t)  # batch size
+        dx = (self.y - self.t) / n
+        return dx
+
 class TwoLayersNet:
     def __init__(self, input_size, hidden_size, output_size):
         i, h, o = input_size, hidden_size, output_size
