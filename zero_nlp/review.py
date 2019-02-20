@@ -1,9 +1,4 @@
 # coding: utf-8
-'''
-Created on Tue Feb 12 14:43:12 2019
-
-@author: otani
-'''
 
 from decimal import Decimal
 def dec(x):
