@@ -1,41 +1,60 @@
 # coding: utf-8
+import sys
+import argparse
 import numpy as np
-from layers import Affine, Sigmoid
+from two_layers_net import TwoLayersNet
+from optimizer import SGD
+sys.path.append('../../deep-learning-from-scratch-2/dataset')
+import spiral
 
-class TwoLayersNet:
-    def __init__(self, input_size, hidden_size, output_size):
-        i, h, o = input_size, hidden_size, output_size
+def print_pg(model, ttl, cnt, flg):
+    ''' params, grads 確認用 '''
+    if flg:
+        print('###', ttl, cnt, '----------------###')
+        for cnt, l in enumerate(model.layers):
+            print('## layer:', cnt)
+            print('# params:', l.params)
+            print('# grads:', l.grads)
 
-        w1 = np.random.randn(i, h)
-        b1 = np.random.randn(h)
-        w2 = np.random.randn(h, o)
-        b2 = np.random.randn(o)
+        print('## model params ##')
+        for j in range(len(model.params)):
+            print(model.params[j])
+        print('## model grads ##')
+        for k in range(len(model.grads)):
+            print(model.grads[k])
 
-        self.layers = [
-            Affine(w1, b1),
-            Sigmoid(),
-            Affine(w2, b2)
-        ]
+if __name__ == '__main__':
 
-        self.params = []
-        for l in self.layers:
-            self.params += l.params
+    psr = argparse.ArgumentParser()
 
-    def predict(self, x):
-        for l in self.layers:
-            x = l.forward(x)
-        return x
+    psr.add_argument('-p', help='print pram or not.', type=int, default=0, choices=[0,1])
+    args = psr.parse_args()
+    pflg = args.p
 
-if __name__=='__main__':
+    #max_epoch = 300
+    #batch_size = 30
+    hidden_size = 10
+    learning_rate = 0.01
 
-    x = np.random.randn(10, 2)
-    model = TwoLayersNet(2, 4, 3)
-    print(model.params)
-    print()
-    for i in range(len(model.layers)):
-        print(i, model.layers[i].params)
-        print()
+    x, t = spiral.load_data()
+    model = TwoLayersNet(input_size=2, hidden_size=hidden_size, output_size=3)
+    opt = SGD(learning_rate)
 
-    score = model.predict(x)
-    print(score)
+    # データshuffle
+    idx = np.random.permutation(len(x))
+    x = x[idx]
+    t = t[idx]
 
+    # とりま10回
+    for i in range(10):
+
+        loss = model.forward(x, t)
+        print('loss:', loss)
+        print_pg(model, 'forward', i, pflg)
+
+        dl = model.backward(loss)
+        #print('dl:', dl)
+        print_pg(model, 'backward', i, pflg)
+
+        opt.update(model.params, model.grads)
+        print_pg(model, 'update', i, pflg)

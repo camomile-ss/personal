@@ -1,6 +1,6 @@
 # coding: utf-8
-
 from decimal import Decimal
+
 def dec(x):
     ''' float -> decimal '''
     return Decimal(str(x))
