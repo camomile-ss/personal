@@ -30,6 +30,8 @@ class TwoLayersNet:
 
     def forward(self, x, t):
         score = self.predict(x)
+        #print('t:', t)  # test
+        #print('score:', score)  # test
         loss = self.loss_layer.forward(score, t)
         return loss
 
@@ -37,7 +39,7 @@ class TwoLayersNet:
         dl = self.loss_layer.backward(dl)
         for l in self.layers[::-1]:
             dl = l.backward(dl)
-        return dl
+        #return dl
 
 if __name__=='__main__':
 
