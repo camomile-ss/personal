@@ -26,6 +26,45 @@ def preprocess(text):
 
     return corpus, word_to_id, id_to_word
 
+def create_co_matrix(corpus, vocab_size, window_size):
+    ''' 共起行列 '''
+    co_matrix = np.zeros((vocab_size, vocab_size), dtype=np.int32)
+
+    for idx, word_id in enumerate(corpus):
+        for i in range(1, window_size+1):
+
+            left_idx, right_idx = idx - i, idx + i
+
+            if left_idx >= 0:
+                co_matrix[word_id, corpus[left_idx]] += 1
+            if right_idx < len(corpus):
+                    co_matrix[word_id, corpus[right_idx]] += 1
+
+    return co_matrix
+
+def cos_similarity(x, y, eps=1e-8):
+    ''' コサイン類似度 '''
+    x_ = x / (np.sqrt(np.sum(x**2)) + eps)  # x / (np.linalg.norm(x) + eps)
+    y_ = y / (np.sqrt(np.sum(y**2)) + eps)  # y / (np.linalg.norm(y) + eps)
+
+    return np.dot(x_, y_)
+
+"""
+def most_similar(query, word_to_id, id_to_word, word_matrix, top=5):
+    '''
+    類似度上位の単語を表示
+        query: 基準の単語
+    '''
+    if not query in word_to_id:
+        print('{0} is not found.'.format(query))
+        return
+
+    query_id = word_to_id[query]
+    query_vec = word_matrix[query_id]
+
+    for i, vec in
+"""
+
 if __name__ == '__main__':
 
     corpus, word_to_id, id_to_word = preprocess('You say goodbye and I say hello.')
@@ -33,3 +72,9 @@ if __name__ == '__main__':
     print(corpus)
     print(word_to_id)
     print(id_to_word)
+
+    co_matrix = create_co_matrix(corpus, len(word_to_id), 1)
+
+    print(co_matrix)
+
+    print(cos_similarity(co_matrix[0], co_matrix[4]))
