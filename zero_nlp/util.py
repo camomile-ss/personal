@@ -49,7 +49,6 @@ def cos_similarity(x, y, eps=1e-8):
 
     return np.dot(x_, y_)
 
-"""
 def most_similar(query, word_to_id, id_to_word, word_matrix, top=5):
     '''
     類似度上位の単語を表示
@@ -62,8 +61,25 @@ def most_similar(query, word_to_id, id_to_word, word_matrix, top=5):
     query_id = word_to_id[query]
     query_vec = word_matrix[query_id]
 
-    for i, vec in
-"""
+    # コサイン類似度
+    simi = np.zeros(len(word_to_id))
+    for i, vec in enumerate(word_matrix):
+        simi[i] = cos_similarity(query_vec, vec)
+
+    order = simi.argsort()[::-1]  # 大きい順
+
+    # 上位表示
+    print('[top {0}]  query: {1}'.format(top, query))
+    cnt = 0
+    for o in order:
+        if o == query_id:
+            continue
+
+        cnt += 1
+        print('({0}) {1:10} similarity: {2}'.format(cnt, id_to_word[o], simi[o]))
+
+        if cnt >= top:
+            return
 
 if __name__ == '__main__':
 
@@ -78,3 +94,5 @@ if __name__ == '__main__':
     print(co_matrix)
 
     print(cos_similarity(co_matrix[0], co_matrix[4]))
+
+    most_similar('you', word_to_id, id_to_word, co_matrix)
