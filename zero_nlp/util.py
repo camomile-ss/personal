@@ -81,6 +81,41 @@ def most_similar(query, word_to_id, id_to_word, word_matrix, top=5):
         if cnt >= top:
             return
 
+def ppmi(c, eps=1e-8):
+    '''
+    正の相互情報量 positive pointwise mutual information
+    c: 共起行列()
+    '''
+    n = np.sum(c, dtype=np.int32)
+    cx = np.sum(c, axis=1, keepdims=True, dtype=np.int32)
+    cy = np.sum(c, axis=0, keepdims=True, dtype=np.int32)
+
+    pmi = np.log2(n * c / cx / cy + eps, dtype=np.float32)
+    m = np.maximum(pmi, 0)
+
+    return m
+
+def ppmi_text(c, verbose=False, eps=1e-8):
+    ''' 著者さま提供のほう '''
+    n = np.sum(c)
+    cx = np.sum(c, axis=0)
+    if verbose:
+        total = len(c) ** 2
+        print_span = total // 100 + 1
+
+    m = np.zeros_like(c, dtype=np.float32)
+    for i in range(len(c)):
+        for j in range(len(c)):
+            pmi = np.log2(n * c[i, j] / (cx[i] * cx[j]) + eps)
+            m[i, j] = max(0, pmi)
+
+            if verbose:
+                cnt = i * len(c) + j + 1
+                if cnt % print_span == 0:
+                    print('{0:.1f}% done'.format(cnt / total * 100))
+
+    return m
+
 if __name__ == '__main__':
 
     corpus, word_to_id, id_to_word = preprocess('You say goodbye and I say hello.')
@@ -96,3 +131,14 @@ if __name__ == '__main__':
     print(cos_similarity(co_matrix[0], co_matrix[4]))
 
     most_similar('you', word_to_id, id_to_word, co_matrix)
+
+    print(ppmi(co_matrix))
+    print(ppmi_text(co_matrix))
+
+    # 時間比較
+    import timeit
+    number = 10000
+    t1 = timeit.timeit('ppmi(co_matrix)', globals=globals(), number=number)
+    t2 = timeit.timeit('ppmi_text(co_matrix)', globals=globals(), number=number)
+    print(t1)  # 0.2701249169986113
+    print(t2)  # 1.5738809940012288
