@@ -90,7 +90,17 @@ def ppmi(c, eps=1e-8):
     cx = np.sum(c, axis=1, keepdims=True, dtype=np.int32)
     cy = np.sum(c, axis=0, keepdims=True, dtype=np.int32)
 
-    pmi = np.log2(n * c / cx / cy + eps, dtype=np.float32)
+    print(cx)
+    print(cy)
+    print(np.min(cx))
+    print(np.min(cy))
+
+    wk = n * c / cx / cy + eps
+    print(np.isinf(wk).any())
+    print(np.isnan(wk).any())
+    pmi = np.log2(wk)
+
+    #pmi = np.log2(n * c / cx / cy + eps, dtype=np.float32)
     m = np.maximum(pmi, 0)
 
     return m
@@ -98,19 +108,20 @@ def ppmi(c, eps=1e-8):
 def ppmi_text(c, verbose=False, eps=1e-8):
     ''' 著者さま提供のほう '''
     n = np.sum(c)
-    cx = np.sum(c, axis=0)
+    cx = np.sum(c, axis=1)
+    cy = np.sum(c, axis=0)
     if verbose:
-        total = len(c) ** 2
-        print_span = total // 100 + 1
+        total = c.shape[0] * c.shape[1]
+        print_span = -(-total // 100)
 
     m = np.zeros_like(c, dtype=np.float32)
-    for i in range(len(c)):
-        for j in range(len(c)):
-            pmi = np.log2(n * c[i, j] / (cx[i] * cx[j]) + eps)
+    for i in range(c.shape[0]):
+        for j in range(c.shape[1]):
+            pmi = np.log2(n * c[i, j] / (cx[i] * cy[j]) + eps)
             m[i, j] = max(0, pmi)
 
             if verbose:
-                cnt = i * len(c) + j + 1
+                cnt = i * c.shape[0] + j + 1
                 if cnt % print_span == 0:
                     print('{0:.1f}% done'.format(cnt / total * 100))
 
@@ -130,10 +141,9 @@ if __name__ == '__main__':
 
     print(cos_similarity(co_matrix[0], co_matrix[4]))
 
-    most_similar('you', word_to_id, id_to_word, co_matrix)
-
-    print(ppmi(co_matrix))
-    print(ppmi_text(co_matrix))
+    m = ppmi(co_matrix)
+    print(m)
+    print(ppmi_text(co_matrix, verbose=True))
 
     # 時間比較
     import timeit
@@ -142,3 +152,26 @@ if __name__ == '__main__':
     t2 = timeit.timeit('ppmi_text(co_matrix)', globals=globals(), number=number)
     print(t1)  # 0.2701249169986113
     print(t2)  # 1.5738809940012288
+
+    # SVD
+    U, S, V = np.linalg.svd(m)
+
+    print(U)
+    print(S)
+    print(V)
+
+    # plot
+    import matplotlib.pyplot as plt
+    for word, word_id in word_to_id.items():
+        plt.annotate(word, (U[word_id, 0], U[word_id, 1]))
+    plt.scatter(U[:,0], U[:,1], alpha=0.5)
+    plt.savefig('print/chap2_plt.png')
+
+    m_ = U[:,:2]
+
+    print('co_matrix')
+    most_similar('you', word_to_id, id_to_word, co_matrix)
+    print('ppmi')
+    most_similar('you', word_to_id, id_to_word, m)
+    print('svd')
+    most_similar('you', word_to_id, id_to_word, m_)
