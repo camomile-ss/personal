@@ -98,6 +98,27 @@ class Affine:
         self.grads[1][...] = db
         return dx
 
+class MatMul:
+    ''' バイアスを用いない全結合層 '''
+    def __init__(self, w):
+        self.params = [w]
+        self.grads = [np.zeros_like(w)]
+        self.x = None
+
+    def forward(self, x):
+        w, = self.params
+        self.x = x
+        y = np.dot(x, w)
+        return y
+
+    def backward(self, dy):
+        w = self.params
+        dx = np.dot(dy, w.T)
+        dw = np.dot(self.x.T, dy)
+
+        self.grads[0][...] = dw
+        return dx
+
 class Softmax:
     def __init__(self):
         self.params = []
