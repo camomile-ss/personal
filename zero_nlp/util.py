@@ -38,7 +38,7 @@ def create_co_matrix(corpus, vocab_size, window_size):
             if left_idx >= 0:
                 co_matrix[word_id, corpus[left_idx]] += 1
             if right_idx < len(corpus):
-                    co_matrix[word_id, corpus[right_idx]] += 1
+                co_matrix[word_id, corpus[right_idx]] += 1
 
     return co_matrix
 
@@ -86,22 +86,60 @@ def ppmi(c, eps=1e-8):
     正の相互情報量 positive pointwise mutual information
     c: 共起行列()
     '''
-    n = np.sum(c, dtype=np.int32)
-    cx = np.sum(c, axis=1, keepdims=True, dtype=np.int32)
-    cy = np.sum(c, axis=0, keepdims=True, dtype=np.int32)
+    c = c.astype(np.float32)
+    n = np.sum(c)
+    cx = np.sum(c, axis=1, keepdims=True)
+    cy = np.sum(c, axis=0, keepdims=True)
+    pmi = np.log2(n * c / (cx * cy) + eps, dtype=np.float32)
+    m = np.maximum(pmi, 0)
 
-    print(cx)
-    print(cy)
-    print(np.min(cx))
-    print(np.min(cy))
+    return m
+
+def ppmi_debug(c, eps=1e-8):
+    '''
+    正の相互情報量 positive pointwise mutual information
+    c: 共起行列()
+    *** debug 用 ***
+    '''
+    debug_dir = 'chap2_debug_100/'
+
+    c = c.astype(np.uint)  # uintだとptbデータMemory Error。float32がよさそう。
+    n = np.sum(c)  #, dtype=np.int32)
+    cx = np.sum(c, axis=1, keepdims=True)  #, dtype=np.int32)
+    cy = np.sum(c, axis=0, keepdims=True)  #, dtype=np.int32)
+    print('c; {0}, n: {1}, cx: {2}, cy: {3}'.format(c.dtype, n.dtype, cx.dtype, cy.dtype))
+
+    np.savetxt(debug_dir + 'cx.tsv', cx, delimiter='\t')  #, fmt='%.3e')
+    np.savetxt(debug_dir + 'cy.tsv', cy, delimiter='\t')  #, fmt='%.3e')
+
+    wk1 = n * c  # cをastypeしないとint32になりあふれてマイナスになる
+    wk2 = wk1 / cx
+    wk3 = wk2 / cy
+    wk4 = wk3 + eps
+    print('n*c: {0}, n*c/cx: {1}, n*c/cx/cy: {2}, n*c/cx/cy+eps: {3}'.format(wk1.dtype, wk2.dtype, wk3.dtype, wk4.dtype))
+    np.savetxt(debug_dir + 'wk1.tsv', wk1, delimiter='\t')  #, fmt='%.3e')
+    np.savetxt(debug_dir + 'wk2.tsv', wk2, delimiter='\t')  #, fmt='%.3e')
+    np.savetxt(debug_dir + 'wk3.tsv', wk3, delimiter='\t')  #, fmt='%.3e')
+    np.savetxt(debug_dir + 'wk4.tsv', wk4, delimiter='\t')  #, fmt='%.3e')
+    wk5 = n * c / (cx * cy) + eps
+    print('n*c/(cx*cy)+eps: {0}'.format(wk5.dtype))
+    np.savetxt(debug_dir + 'wk5.tsv', wk5, delimiter='\t')  #, fmt='%.3e')
+
+    cx_cy = cx * cy
+    np.savetxt(debug_dir + 'cx_cy.tsv', cx_cy, delimiter='\t')  #, fmt='%.3e')
+    wk_ = n * c / cx_cy + eps
+    np.savetxt(debug_dir + 'wk_.tsv', wk_, delimiter='\t')  #, fmt='%.3e')
 
     wk = n * c / cx / cy + eps
+    #np.savetxt(debug_dir + 'wk.tsv', wk, delimiter='\t')  #, fmt='%.3e')
     print(np.isinf(wk).any())
     print(np.isnan(wk).any())
-    pmi = np.log2(wk)
+    pmi = np.log2(wk5, dtype=np.float32)
+    #np.savetxt(debug_dir + 'pmi.tsv', pmi, delimiter='\t')  #, fmt='%.3e')
 
     #pmi = np.log2(n * c / cx / cy + eps, dtype=np.float32)
     m = np.maximum(pmi, 0)
+    print('pmi: {0}, ppmi: {1}'.format(pmi.dtype, m.dtype))
 
     return m
 

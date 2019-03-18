@@ -1,0 +1,56 @@
+SVD (self ppmi)
+[top 5]  query: you
+(1) i          similarity: 0.6755483746528625
+(2) we         similarity: 0.6457242369651794
+(3) do         similarity: 0.6186643838882446
+(4) anybody    similarity: 0.5467730760574341
+(5) 've        similarity: 0.5238451957702637
+SVD (t ppmi)
+[top 5]  query: you
+(1) i          similarity: 0.6755431294441223
+(2) we         similarity: 0.6457221508026123
+(3) do         similarity: 0.6186652779579163
+(4) anybody    similarity: 0.5467740893363953
+(5) 've        similarity: 0.5238408446311951
+SVD (self ppmi)
+[top 5]  query: year
+(1) month      similarity: 0.7190057039260864
+(2) quarter    similarity: 0.6843902468681335
+(3) third      similarity: 0.6593393683433533
+(4) last       similarity: 0.6322301030158997
+(5) june       similarity: 0.6181958317756653
+SVD (t ppmi)
+[top 5]  query: year
+(1) month      similarity: 0.7190124988555908
+(2) quarter    similarity: 0.6843919157981873
+(3) third      similarity: 0.6593407392501831
+(4) last       similarity: 0.6322320103645325
+(5) june       similarity: 0.618177056312561
+SVD (self ppmi)
+[top 5]  query: car
+(1) corsica    similarity: 0.6384048461914062
+(2) auto       similarity: 0.6333308815956116
+(3) luxury     similarity: 0.6170324683189392
+(4) truck      similarity: 0.560350239276886
+(5) cars       similarity: 0.5374948978424072
+SVD (t ppmi)
+[top 5]  query: car
+(1) corsica    similarity: 0.6384013891220093
+(2) auto       similarity: 0.6333370208740234
+(3) luxury     similarity: 0.6170358657836914
+(4) truck      similarity: 0.5603516697883606
+(5) cars       similarity: 0.5374958515167236
+SVD (self ppmi)
+[top 5]  query: toyota
+(1) motor      similarity: 0.736700177192688
+(2) nissan     similarity: 0.6526198983192444
+(3) motors     similarity: 0.6516482830047607
+(4) lexus      similarity: 0.6355042457580566
+(5) honda      similarity: 0.6337636113166809
+SVD (t ppmi)
+[top 5]  query: toyota
+(1) motor      similarity: 0.7367023825645447
+(2) nissan     similarity: 0.6526053547859192
+(3) motors     similarity: 0.6516504287719727
+(4) lexus      similarity: 0.6355005502700806
+(5) honda      similarity: 0.633765459060669
