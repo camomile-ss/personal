@@ -73,19 +73,21 @@ def try_translate(text, try_span=10, try_times=5):
     while True:
         try:
             tt = translator.translate(text, dest='ja')
-        except json.decoder.JSONDecodeError:
+        except json.decoder.JSONDecodeError:  # googleがブロック?
             e1_cnt += 1
             if e1_cnt > try_times:
                 break
             print('[warn] sleep {0}sec (try {1}/{2})...'.format(try_span, e1_cnt, try_times))
             time.sleep(try_span)
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError:  # proxy設定必要
             env_now, envname = set_env_proxy(env_first, env_now, envname)
             env_first = 0
             if env_now == 9:
                 break
-        except:
-            print('[err] unknown..')
+        except Exception as e:  # わからないエラー
+            print('[err]: {0}'.format(type(e)))
+            print('e.args: {0}'.format(e.args))
+            print('e: {0}'.format(e))
             break
         else:
             break
