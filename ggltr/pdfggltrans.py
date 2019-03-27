@@ -98,7 +98,7 @@ def align_length(block):
         # 無いとき
         if len(idx_match) == 0:
             # 均等分割長未満で探す
-            idx_match = [x for x in idx_period if x < blen][::-1]
+            idx_match = [x for x in idx_period if x < blen][::-1]  # 長いほうを取るので逆に
             if len(idx_match) == 0:
                 # それでもなければ空文字で分割
                 idx_match = [x for x in idx_space if x >= blen and x < 5000]
@@ -109,7 +109,7 @@ def align_length(block):
                         idx_match = [b_start + blen]
         # block切り出し
         b_end = idx_match[0]
-        blocks_al.append(block[b_start: b_end])
+        blocks_al.append(block[b_start: b_end].strip())
         b_start = b_end
 
     return blocks_al
@@ -121,7 +121,7 @@ def format_text(raw_text):
     blocks = raw_text.split('\n\n')
     # 1block5000文字以下に
     blocks_al = [x for b in blocks for x in align_length(b)]
-    # 各blockの改行取る
+    # 各block内の改行取る
     blocks_al = [re.sub(r'\s', ' ', b) for b in blocks_al]
     # 各blockを改行でつなげる
     f_text = '\n'.join(blocks_al) + '\n'
@@ -280,8 +280,9 @@ if __name__ == '__main__':
             jp_text.append(jt.text)
         else:
             print('block {0} cannot translate.')
-        if (i + 1) % 100 == 0 or i == len(org_text) - 1:
+        if (i + 1) % 100 == 0:
             print('{:.1f}% translated.'.format(i / len(org_text) * 100))
+    print('100.0% translated.')
 
     # 翻訳文書き出す
     jp_text = '\n'.join(jp_text) + '\n'
