@@ -12,7 +12,7 @@ import urllib.parse
 from getpass import getpass
 from googletrans import Translator
 
-def parse_pdf_pages(pdfname):
+def parse_pdf_pages(pdffname):
     ''' PDFから各ページのテキスト抽出 '''
 
     from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -25,7 +25,7 @@ def parse_pdf_pages(pdfname):
     p_txts = []
     rsrcmgr = PDFResourceManager()
 
-    with open(pdfname, 'rb') as pdff:
+    with open(pdffname, 'rb') as pdff:
         try:
             for p in PDFPage.get_pages(pdff):
                 with StringIO() as strio, \
@@ -34,7 +34,7 @@ def parse_pdf_pages(pdfname):
                     interpreter.process_page(p)
                     p_txts.append(strio.getvalue())
         except PDFTextExtractionNotAllowed:
-            print('[err] PDF {0} text extraction not allowed.'.format(infname))
+            print('[err] PDF {0} text extraction not allowed.'.format(pdffname))
             sys.exit()
         except Exception as e:
             print('[err]: {0}'.format(type(e)))
@@ -44,27 +44,27 @@ def parse_pdf_pages(pdfname):
 
     return p_txts
 
-def parse_pdf(infname):
+def parse_pdf(pdffname):
     ''' PDFテキスト抽出 '''
 
-    pages = parse_pdf_pages(infname)
+    pages = parse_pdf_pages(pdffname)
     # 各ページ
     for i in range(len(pages)):
         pages[i] = pages[i].strip()  # 改ページ入ってるのでstrip()
         pages[i] = re.sub(r'\n*\d*$', '\n', pages[i])  # ページを取る
         pages[i] = re.sub(r'\.\n$', '\.\n\n', pages[i])  # ピリオドで終わってたら空行入れる
     # つなげる
-    pdf_text = ''.join(pages)
+    text = ''.join(pages)
 
-    return pdf_text
+    return text
 
-def read_text(infname):
+def read_text(txtfname):
     ''' テキストファイルを読む '''
 
     # 文字コード判定
-    with open(infname, 'rb') as f:
+    with open(txtfname, 'rb') as f:
         cd = cchardet.detect(f.read())
-    with open(infname, 'r', encoding=cd['encoding']) as f:
+    with open(txtfname, 'r', encoding=cd['encoding']) as f:
         text = f.read()
 
     return text
@@ -132,11 +132,11 @@ def set_env_proxy(first, flg, envname):
     '''
     環境変数https_proxyをセット
     return
-      1個め: 今のos.environの設定状況。 1, 2, 9
+      1個め: 今のos.environの設定状況。
         1: http(s)://host:port
         2: http(s)://user:password@host:port
         9: 書式不正 or 合っててもproxy通らなかった -> err
-      2個め: 環境変数のなまえ（大文字or小文字）
+      2個め: 環境変数のなまえ（'https_proxy' or 'HTTPS_PROXY'）
     '''
     ptn_hp = re.compile(r'^(https?:\/\/)([^@]+:\d+)$')  # パターン1 http(s)://host:port
     ptn_hpup = re.compile(r'^https?:\/\/[^@]+:[^@]+@[^@]+:\d+$')  # パターン2 http(s)://user:pass@host:port
@@ -227,46 +227,42 @@ if __name__ == '__main__':
     psr.add_argument('-f', '--formatted', help='整形済み。\
                      余分な改行の削除などの整形が終わっているテキストファイルを入力する場合指定してください。',
                      action='store_true')
-    psr.add_argument('-t', '--trytimes', help='google翻訳が返答しない場合にリトライする回数。', type=int, default=5)
-    psr.add_argument('-s', '--tryspan', help='google翻訳が返答しない場合にリトライする間隔。', type=int, default=10)
+    psr.add_argument('-t', '--trytimes', help='google翻訳が返答しない場合にリトライする回数。default 5。',
+                     type=int, default=5)
+    psr.add_argument('-s', '--tryspan', help='google翻訳が返答しない場合にリトライする間隔(秒)。default 5。',
+                     type=int, default=5)
     args = psr.parse_args()
-    infname = args.infname
-    outdir = args.outdir
-    fmtd = args.formatted
-    try_times = args.trytimes
-    try_span = args.tryspan
 
-    infbase, _ = os.path.splitext(os.path.basename(infname))
+    infbase, _ = os.path.splitext(os.path.basename(args.infname))
 
     # pdf
-    #mob = re.search(r'([^\/]*)\.[pP][dD][fF]$', infname)
-    mob = re.search(r'[^\/]*\.[pP][dD][fF]$', infname)
+    mob = re.search(r'[^\/]*\.[pP][dD][fF]$', args.infname)
     if mob:
 
-        if fmtd:
+        if args.formatted:
             print('pdfではオプション -f (--formatted) は指定できません。', file=sys.stderr)
             sys.exit()
 
         # pdfからテキストに
         print('getting text from pdf..')
-        raw_text = parse_pdf(infname)
+        raw_text = parse_pdf(args.infname)
         # 中間ファイルに書き出す
-        pfname = os.path.join(outdir, '{0}_parse_pdf.txt'.format(infbase))
-        with open(pfname, 'w') as pf:
+        ppfname = os.path.join(args.outdir, '{0}_parse_pdf.txt'.format(infbase))
+        with open(ppfname, 'w') as pf:
             pf.write(raw_text)
 
     # テキストファイル
     else:
-        raw_text = read_text(infname)
+        raw_text = read_text(args.infname)
 
     # 整形済みか
-    if fmtd:
+    if args.formatted:
         org_text = raw_text
     else:
         print('formatting..')
         org_text = format_text(raw_text)  # 整形処理
         # 中間ファイルに書き出す
-        orgfname = os.path.join(outdir, '{0}_original.txt'.format(infbase))
+        orgfname = os.path.join(args.outdir, '{0}_original.txt'.format(infbase))
         with open(orgfname, 'w') as of:
             of.write(org_text)
 
@@ -275,18 +271,18 @@ if __name__ == '__main__':
     jp_text = []
     org_text = org_text.split('\n')
     for i, ot in enumerate(org_text):
-        jt = try_translate(ot, try_span=try_span, try_times=try_times)
-        if jt:
-            jp_text.append(jt.text)
+        ttj = try_translate(ot, try_span=args.tryspan, try_times=args.trytimes)
+        if ttj:
+            jp_text.append(ttj.text)
         else:
-            print('block {0} cannot translate.')
+            print('block {0} cannot translate.'.format(i+1))
         if (i + 1) % 100 == 0:
-            print('{:.1f}% translated.'.format(i / len(org_text) * 100))
-    print('100.0% translated.')
+            print('{:.1f}%..'.format(i / len(org_text) * 100))
+    print('100.0%.')
 
     # 翻訳文書き出す
     jp_text = '\n'.join(jp_text) + '\n'
-    jpfname = os.path.join(outdir, '{0}_japanese.txt'.format(infbase))
+    jpfname = os.path.join(args.outdir, '{0}_japanese.txt'.format(infbase))
     print('{0} writing..'.format(jpfname))
     with open(jpfname, 'w') as jf:
         jf.write(jp_text)
