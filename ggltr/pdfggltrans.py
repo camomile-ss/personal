@@ -248,7 +248,7 @@ if __name__ == '__main__':
         raw_text = parse_pdf(args.infname)
         # 中間ファイルに書き出す
         ppfname = os.path.join(args.outdir, '{0}_parse_pdf.txt'.format(infbase))
-        with open(ppfname, 'w') as pf:
+        with open(ppfname, 'w', encoding='utf-8') as pf:
             pf.write(raw_text)
 
     # テキストファイル
@@ -263,7 +263,7 @@ if __name__ == '__main__':
         org_text = format_text(raw_text)  # 整形処理
         # 中間ファイルに書き出す
         orgfname = os.path.join(args.outdir, '{0}_original.txt'.format(infbase))
-        with open(orgfname, 'w') as of:
+        with open(orgfname, 'w', encoding='utf-8') as of:
             of.write(org_text)
 
     # 翻訳
@@ -284,7 +284,7 @@ if __name__ == '__main__':
     jp_text = '\n'.join(jp_text) + '\n'
     jpfname = os.path.join(args.outdir, '{0}_japanese.txt'.format(infbase))
     print('{0} writing..'.format(jpfname))
-    with open(jpfname, 'w') as jf:
+    with open(jpfname, 'w', encoding='utf-8') as jf:
         jf.write(jp_text)
 
     print('done.')
