@@ -18,3 +18,6 @@ D:\～～>C:\～～\qpdf-8.4.0\bin\qpdf.exe --decrypt 元ファイル.pdf 出力
 * googleがブロック、ということらしい。
 * time.sleep(x) で待って何度かtryにしてみる。
 * catchするエラーは「json.decoder.JSONDecodeError」
+
+proxyないとこだと一度ダメになると全然ダメ。(2019.4.7)
+　-> 他の方法を考えるor調べる。。。
