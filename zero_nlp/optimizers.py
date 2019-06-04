@@ -8,3 +8,11 @@ class SGD:
     def update(self, params, grads):
         for i in range(len(params)):
             params[i] -= self.lr * grads[i]
+
+    """ うまくいかない
+    def update(self, params, grads):
+        print('params', id(params))
+        params = [p - self.lr * g for p, g in zip(params, grads)]
+        print('params', id(params))
+        #-> paramsの場所変わっちゃうから。
+    """

@@ -21,7 +21,7 @@ class TwoLayersNet:
         self.params, self.grads = [], []
         for l in self.layers:
             self.params += l.params
-            self.grads += l.grads
+            self.grads += l.grads  # 勾配まとめはこのときだけ。-> 各layerの勾配更新は参照場所を動かさないようにする。
 
     def predict(self, x):
         for l in self.layers:

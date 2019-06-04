@@ -94,7 +94,7 @@ class Affine:
         dw = np.dot(self.x.T, dy)
         db = np.sum(dy, axis=0)
 
-        self.grads[0][...] = dw
+        self.grads[0][...] = dw  # 3点リーダ-> コピー先の参照場所を動かさない。
         self.grads[1][...] = db
         return dx
 
