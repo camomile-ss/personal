@@ -165,14 +165,54 @@ def ppmi_text(c, verbose=False, eps=1e-8):
 
     return m
 
+def create_contexts_target(corpus, window_size=1):
+    ''' corpus から contexts, target さくせい '''
+
+    target = corpus[window_size: -window_size]
+    contexts = []
+    for i in range(window_size, len(corpus) - window_size):
+        contexts.append(np.r_[corpus[i-window_size: i], corpus[i+1: i+1+window_size]])
+
+    return np.array(contexts), np.array(target)
+
+def create_contexts_target_text(corpus, window_size=1):
+    ''' 著者さま提供のほう '''
+
+    target = corpus[window_size: -window_size]
+    contexts = []
+    for i in range(window_size, len(corpus) - window_size):
+        cs = []
+        for t in range(-window_size, window_size + 1):
+            if t ==0:
+                continue
+            cs.append(corpus[i+t])
+        contexts.append(cs)
+
+    return np.array(contexts), np.array(target)
+
 if __name__ == '__main__':
 
     corpus, word_to_id, id_to_word = preprocess('You say goodbye and I say hello.')
+    #corpus, word_to_id, id_to_word = preprocess('ok')
 
     print(corpus)
-    print(word_to_id)
-    print(id_to_word)
+    #print(word_to_id)
+    #print(id_to_word)
 
+    con, tar = create_contexts_target(corpus)
+    con_t, tar_t = create_contexts_target_text(corpus)
+
+    print(con)
+    print(type(con))
+    print(tar)
+    print(type(tar))
+    print('')
+    print(con_t)
+    print(type(con_t))
+    print(tar_t)
+    print(type(tar_t))
+
+    """
     co_matrix = create_co_matrix(corpus, len(word_to_id), 1)
 
     print(co_matrix)
@@ -213,3 +253,4 @@ if __name__ == '__main__':
     most_similar('you', word_to_id, id_to_word, m)
     print('svd')
     most_similar('you', word_to_id, id_to_word, m_)
+    """
