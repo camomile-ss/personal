@@ -1,31 +1,15 @@
 # coding: utf-8
-'''
-'''
-import numpy as np
-from layers import MatMul, SoftmaxWithLoss
+from util import preprocess, create_contexts_target, convert_one_hot
 
 if __name__ == '__main__':
 
-    c0 = np.array([[1, 0, 0, 0, 0, 0, 0]])
-    c1 = np.array([[1, 0, 1, 0, 0, 0, 0]])
+    text = 'You say goodbye and I say hello.'
+    corpus, word_to_id, id_to_word = preprocess(text)
 
-    w_in = np.random.randn(7, 3)
-    w_out = np.random.randn(3, 7)
+    contexts, target = create_contexts_target(corpus)
 
-    in_layer0 = MatMul(w_in)
-    in_layer1 = MatMul(w_in)
-    out_layer = MatMul(w_out)
+    contexts = convert_one_hot(contexts, vocab_size=len(word_to_id))
+    target = convert_one_hot(target, vocab_size=len(word_to_id))
 
-    h0 = in_layer0.forward(c0)
-    h1 = in_layer1.forward(c1)
-    h = 0.5 * (h0 + h1)
-    s = out_layer.forward(h)
-
-    print(s)
-
-    t = np.array([[0, 1, 0, 0, 0, 0, 0]])
-
-    loss_layer = SoftmaxWithLoss()
-    loss = loss_layer.forward(s, t)
-
-    print(loss)
+    print(contexts)
+    print(target)

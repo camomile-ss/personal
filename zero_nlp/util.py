@@ -170,10 +170,11 @@ def create_contexts_target(corpus, window_size=1):
 
     target = corpus[window_size: -window_size]
     contexts = []
+    corpus = corpus.tolist()
     for i in range(window_size, len(corpus) - window_size):
-        contexts.append(np.r_[corpus[i-window_size: i], corpus[i+1: i+1+window_size]])
+        contexts.append(corpus[i-window_size: i] + corpus[i+1: i+1+window_size])
 
-    return np.array(contexts), np.array(target)
+    return np.array(contexts), target
 
 def create_contexts_target_text(corpus, window_size=1):
     ''' 著者さま提供のほう '''
@@ -190,6 +191,39 @@ def create_contexts_target_text(corpus, window_size=1):
 
     return np.array(contexts), np.array(target)
 
+def convert_one_hot(word_id, vocab_size):
+    ''' 単語IDからone-hot表現に変換 '''
+
+    one_hot_shape = word_id.shape + (vocab_size, )  # 変換後のshape
+    word_id = word_id.reshape(-1)  # ひらたくする
+    one_hot = [[1 if j==word_id[i] else 0 for j in range(vocab_size)]
+               for i in range(len(word_id))]
+
+    return np.array(one_hot).reshape(one_hot_shape)
+
+def convert_one_hot_text(corpus, vocab_size):
+    '''one-hot表現への変換  ##著者さま提供のほう
+
+    :param corpus: 単語IDのリスト（1次元もしくは2次元のNumPy配列）
+    :param vocab_size: 語彙数
+    :return: one-hot表現（2次元もしくは3次元のNumPy配列）
+    '''
+    N = corpus.shape[0]
+
+    if corpus.ndim == 1:
+        one_hot = np.zeros((N, vocab_size), dtype=np.int32)
+        for idx, word_id in enumerate(corpus):
+            one_hot[idx, word_id] = 1
+
+    elif corpus.ndim == 2:
+        C = corpus.shape[1]
+        one_hot = np.zeros((N, C, vocab_size), dtype=np.int32)
+        for idx_0, word_ids in enumerate(corpus):
+            for idx_1, word_id in enumerate(word_ids):
+                one_hot[idx_0, idx_1, word_id] = 1
+
+    return one_hot
+
 if __name__ == '__main__':
 
     corpus, word_to_id, id_to_word = preprocess('You say goodbye and I say hello.')
@@ -200,17 +234,27 @@ if __name__ == '__main__':
     #print(id_to_word)
 
     con, tar = create_contexts_target(corpus)
-    con_t, tar_t = create_contexts_target_text(corpus)
+    #con_t, tar_t = create_contexts_target_text(corpus)
 
     print(con)
     print(type(con))
     print(tar)
     print(type(tar))
-    print('')
+    #print('')
+    #print(con_t)
+    #print(type(con_t))
+    #print(tar_t)
+    #print(type(tar_t))
+
+    con_o = convert_one_hot(con, len(word_to_id))
+    tar_o = convert_one_hot(tar, len(word_to_id))
+    con_t = convert_one_hot_text(con, len(word_to_id))
+    tar_t = convert_one_hot_text(tar, len(word_to_id))
+
+    print(con_o)
+    print(tar_o)
     print(con_t)
-    print(type(con_t))
     print(tar_t)
-    print(type(tar_t))
 
     """
     co_matrix = create_co_matrix(corpus, len(word_to_id), 1)
