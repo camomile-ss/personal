@@ -2,7 +2,7 @@
 from util import preprocess, create_contexts_target, convert_one_hot
 from trainers import Trainer
 from simple_cbow import SimpleCbow
-from optimizers import SGD
+from optimizers import Adam
 
 if __name__ == '__main__':
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     # モデル
     model = SimpleCbow(vocab_size, hidden_size)
-    optimizer = SGD()
+    optimizer = Adam()
 
     # 学習
     trainer = Trainer(model, optimizer)
