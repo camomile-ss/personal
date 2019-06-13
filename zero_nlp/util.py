@@ -199,7 +199,7 @@ def convert_one_hot(word_id, vocab_size):
     one_hot = [[1 if j==word_id[i] else 0 for j in range(vocab_size)]
                for i in range(len(word_id))]
 
-    return np.array(one_hot).reshape(one_hot_shape)
+    return np.array(one_hot, dtype=np.int32).reshape(one_hot_shape)
 
 def convert_one_hot_text(corpus, vocab_size):
     '''one-hot表現への変換  ##著者さま提供のほう

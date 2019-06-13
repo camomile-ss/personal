@@ -32,14 +32,16 @@ class Trainer:
                 # 学習
                 loss = self.model.forward(x_batch, t_batch)
                 self.model.backward(loss)
-                # (未実装) 共有された重みをひとつに集約
+                # 複数layer共有の重みをひとつに （model.params, model.grads の並びはくずさない）
+                params, grads = remove_duplicate(self.model.params, self.model.grads)
                 # (未実装) 勾配クリッピング RNNのときみたい
-                self.opt.update(self.model.params, self.model.grads)
+                self.opt.update(params, grads)
 
                 total_loss.append(loss)
 
                 # 評価
-                if (it + 1) % eval_interval == 0:
+                if (it + 1) % eval_interval == 0 or \
+                   (it_per_epoch < eval_interval and it == it_per_epoch - 1):
                     avg_loss = np.mean(total_loss)
                     elapsed_time = time() - start_time
                     print('epoch: {0}, iter: {1}/{2}, time: {3:.3f}[s], avg loss: {4}'.format( \
@@ -53,3 +55,36 @@ class Trainer:
         plt.xlabel('iter / {0}'.format(self.eval_interval))
         plt.ylabel('avg loss')
         fig.savefig(fname)
+
+def remove_duplicate(params, grads):
+    ''' 複数layer共有の重み、勾配をひとつに。勾配は加算。 '''
+
+    params, grads = params[:], grads[:]  # リストをcopy -> 各パラメータの場所は不変。
+
+    while True:
+        find_flg = False
+
+        for i in range(0, len(params)-1):
+            for j in range(i+1, len(params)):
+                # 重みを共有
+                if params[i] is params[j]:
+                    grads[i] += grads[j]
+                    find_flg = True
+                    params.pop(j)
+                    grads.pop(j)
+                # 転置行列として重みを共有
+                elif params[i].ndim == 2 and params[j].ndim == 2 and \
+                     params[i].T.shape == params[j].shape and np.all(params[i].T == params[j]):
+                    grads[i] += grads[j].T
+                    find_flg = True
+                    params.pop(j)
+                    grads.pop(j)
+
+                # 1個見つけたら最初に戻る
+                if find_flg: break
+            if find_flg: break
+
+        # 全部べつになったら終了
+        if not find_flg: break
+
+    return params, grads

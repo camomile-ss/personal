@@ -112,7 +112,7 @@ class MatMul:
         return y
 
     def backward(self, dy):
-        w = self.params
+        w, = self.params
         dx = np.dot(dy, w.T)
         dw = np.dot(self.x.T, dy)
 
