@@ -3,6 +3,7 @@ from util import preprocess, create_contexts_target, convert_one_hot
 from trainers import Trainer
 from simple_cbow import SimpleCbow
 from optimizers import Adam
+#from optimizers import SGD
 
 if __name__ == '__main__':
 
@@ -21,6 +22,7 @@ if __name__ == '__main__':
     # モデル
     model = SimpleCbow(vocab_size, hidden_size)
     optimizer = Adam()
+    #optimizer = SGD()
 
     # 学習
     trainer = Trainer(model, optimizer)
@@ -28,3 +30,7 @@ if __name__ == '__main__':
 
     # plot
     trainer.plot('chap3.png')
+
+    # 単語の分散表現print
+    for word, word_id in word_to_id.items():
+        print('{0} {1}'.format(word, model.word_vecs[word_id]))

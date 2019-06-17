@@ -13,7 +13,8 @@ class Trainer:
 
     def fit(self, x, t, max_epoch=10, batch_size=32, eval_interval=20):
         self.eval_interval = eval_interval
-        it_per_epoch = - (- len(x) // batch_size)
+        #it_per_epoch = - (- len(x) // batch_size)
+        it_per_epoch = len(x) // batch_size
         total_loss = []  # print用
 
         start_time = time()
@@ -40,8 +41,9 @@ class Trainer:
                 total_loss.append(loss)
 
                 # 評価
-                if (it + 1) % eval_interval == 0 or \
-                   (it_per_epoch < eval_interval and it == it_per_epoch - 1):
+                #if (it + 1) % eval_interval == 0 or \
+                #   (it_per_epoch < eval_interval and it == it_per_epoch - 1):
+                if it % eval_interval == 0:
                     avg_loss = np.mean(total_loss)
                     elapsed_time = time() - start_time
                     print('epoch: {0}, iter: {1}/{2}, time: {3:.3f}[s], avg loss: {4}'.format( \
