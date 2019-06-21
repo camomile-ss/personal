@@ -119,6 +119,25 @@ class MatMul:
         self.grads[0][...] = dw
         return dx
 
+class Embedding:
+    ''' 単語埋め込み層? '''
+    def __init__(self, w):
+        self.params = [w]
+        self.grads = [np.zeros_like(w)]
+        self.idx = None
+
+    def forward(self, idx):
+        w, = self.parms
+        self.idx = idx
+        y = w[idx]
+        return y
+
+    def backward(self, dy):
+        dw, = self.grads
+        dw[...] = 0
+        np.add.at(dw, self.idx, dy)
+        return None
+
 class Softmax:
     def __init__(self):
         self.params = []
