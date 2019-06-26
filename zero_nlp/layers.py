@@ -127,7 +127,7 @@ class Embedding:
         self.idx = None
 
     def forward(self, idx):
-        w, = self.parms
+        w, = self.params
         self.idx = idx
         y = w[idx]
         return y
