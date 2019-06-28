@@ -162,6 +162,25 @@ class SoftmaxWithLoss:
 
     def backward(self, dl):
         n = len(self.t)  # batch size
+        dx = (self.y - self.t) / n  # dlは1に決まってると思うので。。。(違うのか?)
+        return dx
+
+class SigmoidWithLoss:
+    def __init__(self):
+        self.params = []
+        self.grads = []
+        self.y = None  # sigmoid出力
+        self.t = None  # 教師データ
+
+    def forward(self, x, t):
+        self.y = sigmoid(x)
+        self.t = t
+        loss = cross_entropy_error(np.c_[1 - self.y, self.y], self.t)
+        # t=0 -> [1,0], t=1 -> [0,1] (cross_entropy_error内で)
+        return loss
+
+    def backward(self, dl):
+        n = len(self.t)  # batch size
         dx = (self.y - self.t) / n
         return dx
 
