@@ -1,7 +1,7 @@
 # coding: utf-8
 import numpy as np
 import collections
-from layers import Embedding
+from layers import Embedding, SigmoidWithLoss
 from config import GPU
 
 class EmbeddingDot:
@@ -35,7 +35,7 @@ class UnigramSampler:
         self.word_p /= np.sum(self.word_p)
 
     def get_negative_sample(self, target):
-        n = target.shape[0]  # batch size
+        n = len(target)  # batch size
 
         negative_sample = np.zeros((n, self.sample_size), dtype=np.int32)
         for i in range(n):
@@ -87,15 +87,56 @@ class UnigramSampler_text:
 
         return negative_sample
 
+class NegativeSamplingLoss:
+    def __init__(self, w, corpus, power=0.75, sample_size=5):
+        self.sample_size = sample_size
+        self.sampler = UnigramSampler(corpus, power, sample_size)
+        self.loss_layers = [SigmoidWithLoss() for _ in range(sample_size + 1)]  # 正例1個, 負例指定数
+        self.embed_dot_layers = [EmbeddingDot(w) for _ in range(sample_size + 1)]
+        self.params, self.grads = [], []
+        for layer in self.embed_dot_layers:
+            self.params += layer.params
+            self.grads += layer.grads
+
+    def forward(self, h, target):
+        negative_sample = self.sampler.get_negative_sample(target)
+
+        # 正例
+        positive_label = np.ones(len(target), dtype=np.int32)
+        s = self.embed_dot_layers[0].forward(h, target)
+        loss = self.loss_layers[0].forward(s, positive_label)
+
+        # 負例
+        negative_label = np.zeros(len(target), dtype=np.int32)
+        for i in range(self.sample_size):
+            s = self.embed_dot_layers[i+1].forward(h, negative_sample[:, i])
+            loss += self.loss_layers[i+1].forward(s, negative_label)
+
+        return loss
+
 if __name__ == '__main__':
 
     corpus = np.array([0,1,2,3,4,2,3,5,0,1,2])
     power=0.75
     sample_size=2
 
+    w = np.random.randn(6,3)
+    nsl_layer = NegativeSamplingLoss(w, corpus, power, sample_size)
+
+    print(id(w))
+    print(id(nsl_layer.embed_dot_layers[0].params))
+    print(id(nsl_layer.embed_dot_layers[0].params[0]))
+    print(id(nsl_layer.embed_dot_layers[1].params))
+    print(id(nsl_layer.embed_dot_layers[1].params[0]))
+    print(id(nsl_layer.embed_dot_layers[2].params))
+    print(id(nsl_layer.embed_dot_layers[2].params[0]))
+
+    """
     sampler = UnigramSampler(corpus, power, sample_size)
     sampler_text = UnigramSampler_text(corpus, power, sample_size)
 
     print(sampler.word_p)
     print(sampler_text.word_p)
-
+    print(sampler.get_negative_sample(np.array([0,2,4])))
+    print(sampler_text.get_negative_sample(np.array([0,2,4])))
+    """
