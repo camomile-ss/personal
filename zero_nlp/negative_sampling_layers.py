@@ -114,6 +114,13 @@ class NegativeSamplingLoss:
 
         return loss
 
+    def backward(self, dl):
+        dh = 0
+        for l0, l1 in zip(self.loss_layers, self.embed_dot_layers):
+            ds = l0.backward(dl)
+            dh += l1.backward(ds)
+        return dh
+
 if __name__ == '__main__':
 
     corpus = np.array([0,1,2,3,4,2,3,5,0,1,2])
