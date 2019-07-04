@@ -224,8 +224,77 @@ def convert_one_hot_text(corpus, vocab_size):
 
     return one_hot
 
+def normalize(x):
+    ''' ベクトルの正規化 '''
+
+    if x.ndim == 1:
+        x = x / np.sqrt(np.sum(x**2))
+    elif x.ndim == 2:
+        x = x / np.sqrt(np.sum(x**2, axis=1)).reshape(len(x), 1)
+    return x
+
+def analogy_text(a, b, c, word_to_id, id_to_word, word_matrix, top=5, answer=None):
+    for word in (a, b, c):
+        if word not in word_to_id:
+            print('%s is not found' % word)
+            return
+
+    print('\n[analogy] ' + a + ':' + b + ' = ' + c + ':?')
+    a_vec, b_vec, c_vec = word_matrix[word_to_id[a]], word_matrix[word_to_id[b]], word_matrix[word_to_id[c]]
+    query_vec = b_vec - a_vec + c_vec
+    query_vec = normalize(query_vec)
+
+    similarity = np.dot(word_matrix, query_vec)
+
+    if answer is not None:
+        print("==>" + answer + ":" + str(np.dot(word_matrix[word_to_id[answer]], query_vec)))
+
+    count = 0
+    for i in (-1 * similarity).argsort():
+        if np.isnan(similarity[i]):
+            continue
+        if id_to_word[i] in (a, b, c):
+            continue
+        print(' {0}: {1}'.format(id_to_word[i], similarity[i]))
+
+        count += 1
+        if count >= top:
+            return
+
+def analogy(a, b, c, word_to_id, id_to_word, word_matrix, top=5, answer=None):
+    ''' アナロジー(類推) '''
+    for w in (a, b, c):
+        if not w in word_to_id:
+            print('{0} is not found.'.format(w))
+            return
+    #word_matrix = normalize(word_matrix)
+    print('\n[analogy] {0}:{1} = {2}:?'.format(a, b, c))
+    a_vec, b_vec, c_vec = word_matrix[word_to_id[a]], word_matrix[word_to_id[b]], word_matrix[word_to_id[c]]
+    query_vec = b_vec - a_vec + c_vec
+    query_vec = normalize(b_vec - a_vec + c_vec)
+    similarity = np.dot(word_matrix, query_vec)
+
+    count = 0
+    for i in (-1 * similarity).argsort():
+        if np.isnan(similarity[i]):
+            continue
+        if id_to_word[i] in (a, b, c):
+            continue
+        count += 1
+        print('({0:2}) {1}: {2}'.format(count, id_to_word[i], similarity[i]))
+        if count >= top:
+            return
+
 if __name__ == '__main__':
 
+    x1 = np.array([3,4,5], dtype=np.float32)
+    x2 = np.arange(12, dtype=np.float32).reshape(4,3)
+
+    print(normalize(x1))
+    print(normalize(x2))
+    print(np.linalg.norm(normalize(x2), axis=1))
+
+    """
     corpus, word_to_id, id_to_word = preprocess('You say goodbye and I say hello.')
     #corpus, word_to_id, id_to_word = preprocess('ok')
 
@@ -255,6 +324,7 @@ if __name__ == '__main__':
     print(tar_o)
     print(con_t)
     print(tar_t)
+    """
 
     """
     co_matrix = create_co_matrix(corpus, len(word_to_id), 1)
