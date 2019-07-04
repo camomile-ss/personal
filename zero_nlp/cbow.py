@@ -1,7 +1,7 @@
 # coding: utf-8
 import numpy as np
 from layers import Embedding
-from negative_sampling_layer import NegativeSamplingLoss
+from negative_sampling_layers import NegativeSamplingLoss
 
 class CBOW:
     def __init__(self, vocab_size, hidden_size, window_size, corpus):
@@ -22,3 +22,15 @@ class CBOW:
 
         # 単語の分散表現
         self.word_vecs = w_in
+
+    def forward(self, contexts, target):
+        h = [l.forward(contexts[:, i]) for i, l in enumerate(self.embed_layers)]
+        h = sum(h) / len(self.embed_layers)
+        loss = self.ns_loss_layer.forward(h, target)
+        return loss
+
+    def backward(self, dl=1):
+        dh = self.ns_loss_layer.backward(dl)
+        dh /= len(self.embed_layers)
+        for l in self.embed_layers:
+            l.backward(dh)
