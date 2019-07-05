@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     # 単語の分散表現保存
     params = {}
-    params['word_vec'] = model.word_vecs.astype(np.float16)
+    params['word_vecs'] = model.word_vecs.astype(np.float16)
     params['word_to_id'] = word_to_id
     params['id_to_word'] = id_to_word
     fname = 'cbow_params.pkl'

@@ -1,70 +1,129 @@
 [top 5]  query: you
-(1) we         similarity: 0.7353515625
-(2) i          similarity: 0.70751953125
-(3) they       similarity: 0.6328125
-(4) your       similarity: 0.6318359375
-(5) someone    similarity: 0.6083984375
+(1) i          similarity: 0.72900390625
+(2) we         similarity: 0.70166015625
+(3) your       similarity: 0.6376953125
+(4) they       similarity: 0.603515625
+(5) someone    similarity: 0.6015625
 [top 5]  query: year
-(1) month      similarity: 0.8583984375
-(2) week       similarity: 0.775390625
-(3) summer     similarity: 0.77392578125
-(4) spring     similarity: 0.744140625
-(5) decade     similarity: 0.68994140625
+(1) month      similarity: 0.84912109375
+(2) summer     similarity: 0.794921875
+(3) week       similarity: 0.7724609375
+(4) spring     similarity: 0.7685546875
+(5) decade     similarity: 0.68115234375
 [top 5]  query: car
-(1) luxury     similarity: 0.623046875
-(2) truck      similarity: 0.60888671875
-(3) window     similarity: 0.5869140625
-(4) merkur     similarity: 0.583984375
-(5) cars       similarity: 0.5771484375
+(1) window     similarity: 0.61474609375
+(2) auto       similarity: 0.58837890625
+(3) luxury     similarity: 0.5810546875
+(4) cars       similarity: 0.5693359375
+(5) truck      similarity: 0.54931640625
 [top 5]  query: toyota
-(1) weyerhaeuser similarity: 0.62939453125
-(2) seita      similarity: 0.6171875
-(3) engines    similarity: 0.6162109375
-(4) detroit    similarity: 0.59033203125
-(5) motor      similarity: 0.58740234375
+(1) honda      similarity: 0.67822265625
+(2) nissan     similarity: 0.63232421875
+(3) seita      similarity: 0.62548828125
+(4) coated     similarity: 0.6220703125
+(5) chevrolet  similarity: 0.62060546875
 [top 5]  query: cat
-(1) surface    similarity: 0.6376953125
-(2) test       similarity: 0.61669921875
-(3) youngsters similarity: 0.61474609375
-(4) script     similarity: 0.607421875
-(5) medication similarity: 0.60595703125
+(1) test       similarity: 0.62451171875
+(2) similarity similarity: 0.61328125
+(3) youngsters similarity: 0.61083984375
+(4) merits     similarity: 0.6103515625
+(5) passes     similarity: 0.59814453125
 [top 5]  query: music
-(1) ice        similarity: 0.6005859375
-(2) coins      similarity: 0.5322265625
-(3) mint       similarity: 0.51953125
-(4) animal     similarity: 0.51904296875
-(5) yard       similarity: 0.51611328125
---------------------------------------------------
+(1) russians   similarity: 0.60791015625
+(2) crowd      similarity: 0.5556640625
+(3) compatible similarity: 0.55224609375
+(4) gangs      similarity: 0.546875
+(5) contrasts  similarity: 0.5234375
+--- (distance) ----------------------------------------------
 
 [analogy] king:man = queen:?
-( 1) woman: 5.3046875
-( 2) toxin: 4.8203125
-( 3) husband: 4.63671875
-( 4) lady: 4.53125
-( 5) yard: 4.5078125
+( 1) lady: 7.2578125
+( 2) timetable: 7.43359375
+( 3) dark: 7.4921875
+( 4) ducks: 7.5078125
+( 5) guests: 7.61328125
+( 6) killer: 7.6171875
+( 7) protest: 7.65234375
+( 8) lobby: 7.78515625
+( 9) appearing: 7.78515625
+(10) balloon: 7.8046875
+(11) kitchen: 7.80859375
+(12) desk: 7.80859375
+(13) russians: 7.8515625
+(14) shouting: 7.89453125
+(15) audience: 7.89453125
+(16) mystery: 7.91015625
+(17) dead: 7.92578125
+(18) 1950s: 7.9375
+(19) shoot: 7.94921875
+(20) bother: 7.953125
+(21) hat: 7.953125
+(22) mother: 7.96875
+(23) dunes: 7.96875
+(24) jokes: 7.97265625
+(25) minute: 7.984375
+(26) yard: 8.0
+(27) flamboyant: 8.0
+(28) deliberations: 8.03125
+(29) cry: 8.0390625
+(30) tremor: 8.0390625
 
 [analogy] take:took = go:?
-( 1) eurodollars: 5.11328125
-( 2) 're: 4.80078125
-( 3) went: 4.47265625
-( 4) came: 4.26953125
-( 5) began: 4.01953125
+( 1) went: 6.56640625
+( 2) came: 6.7578125
+( 3) ran: 7.125
+( 4) got: 7.21875
+( 5) began: 7.421875
 
 [analogy] car:cars = child:?
-( 1) a.m: 6.39453125
-( 2) rape: 5.390625
-( 3) children: 5.28125
-( 4) adults: 5.0546875
-( 5) incest: 4.74609375
+( 1) rooms: 7.11328125
+( 2) children: 7.16015625
+( 3) adults: 7.17578125
+( 4) parents: 7.1796875
+( 5) women: 7.30859375
 
 [analogy] good:better = bad:?
-( 1) rather: 5.6875
-( 2) more: 5.45703125
-( 3) less: 5.08984375
-( 4) greater: 4.51953125
-( 5) faster: 4.25390625
-( 6) fewer: 3.8515625
-( 7) worse: 3.76953125
-( 8) bigger: 3.005859375
-( 9) deeper: 2.994140625
-(10) riskier: 2.97265625
+( 1) deeper: 6.96484375
+( 2) less: 7.203125
+( 3) greater: 7.2265625
+( 4) rampant: 7.390625
+( 5) bigger: 7.45703125
+( 6) merely: 7.47265625
+( 7) actually: 7.51953125
+( 8) ever: 7.54296875
+( 9) worse: 7.5859375
+(10) subsequently: 7.59375
+--- (text) --------------------------------------------------
+
+[analogy] king:man = queen:?
+( 1) woman: 5.26953125
+( 2) toxin: 4.796875
+( 3) lady: 4.75390625
+( 4) a.m: 4.66796875
+( 5) husband: 4.5546875
+
+[analogy] take:took = go:?
+( 1) eurodollars: 5.23046875
+( 2) were: 4.7578125
+( 3) came: 4.5078125
+( 4) crash: 4.29296875
+( 5) was: 4.21875
+
+[analogy] car:cars = child:?
+( 1) a.m: 7.0234375
+( 2) children: 5.296875
+( 3) rape: 4.75390625
+( 4) bond-equivalent: 4.75
+( 5) adults: 4.55859375
+
+[analogy] good:better = bad:?
+( 1) rather: 6.046875
+( 2) less: 5.55078125
+( 3) more: 5.43359375
+( 4) greater: 4.18359375
+( 5) worse: 3.77734375
+( 6) fewer: 3.748046875
+( 7) faster: 3.49609375
+( 8) higher: 3.26171875
+( 9) riskier: 3.056640625
+(10) engage: 2.98046875

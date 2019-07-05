@@ -233,49 +233,53 @@ def normalize(x):
         x = x / np.sqrt(np.sum(x**2, axis=1)).reshape(len(x), 1)
     return x
 
-def analogy_text(a, b, c, word_to_id, id_to_word, word_matrix, top=5, answer=None):
-    for word in (a, b, c):
-        if word not in word_to_id:
-            print('%s is not found' % word)
-            return
-
-    print('\n[analogy] ' + a + ':' + b + ' = ' + c + ':?')
-    a_vec, b_vec, c_vec = word_matrix[word_to_id[a]], word_matrix[word_to_id[b]], word_matrix[word_to_id[c]]
-    query_vec = b_vec - a_vec + c_vec
-    query_vec = normalize(query_vec)
-
-    similarity = np.dot(word_matrix, query_vec)
-
-    if answer is not None:
-        print("==>" + answer + ":" + str(np.dot(word_matrix[word_to_id[answer]], query_vec)))
-
-    count = 0
-    for i in (-1 * similarity).argsort():
-        if np.isnan(similarity[i]):
-            continue
-        if id_to_word[i] in (a, b, c):
-            continue
-        print(' {0}: {1}'.format(id_to_word[i], similarity[i]))
-
-        count += 1
-        if count >= top:
-            return
-
 def analogy(a, b, c, word_to_id, id_to_word, word_matrix, top=5, answer=None):
-    ''' アナロジー(類推) '''
+    '''
+    アナロジー(類推)
+    類似度: 単純に距離
+    '''
     for w in (a, b, c):
         if not w in word_to_id:
             print('{0} is not found.'.format(w))
             return
-    #word_matrix = normalize(word_matrix)
     print('\n[analogy] {0}:{1} = {2}:?'.format(a, b, c))
     a_vec, b_vec, c_vec = word_matrix[word_to_id[a]], word_matrix[word_to_id[b]], word_matrix[word_to_id[c]]
     query_vec = b_vec - a_vec + c_vec
-    query_vec = normalize(b_vec - a_vec + c_vec)
-    similarity = np.dot(word_matrix, query_vec)
+    #------------------------------------------------------------------
+    #similarity = np.sqrt(np.sum((word_matrix - query_vec) ** 2, axis=1))
+    similarity = np.linalg.norm(word_matrix - query_vec, axis=1)  # ベクトル空間での距離
+    #------------------------------------------------------------------
 
     count = 0
-    for i in (-1 * similarity).argsort():
+    for i in similarity.argsort():  # 小さい方が近い
+        if np.isnan(similarity[i]):
+            continue
+        if id_to_word[i] in (a, b, c):
+            continue
+        count += 1
+        print('({0:2}) {1}: {2}'.format(count, id_to_word[i], similarity[i]))
+        if count >= top:
+            return
+
+def analogy_text(a, b, c, word_to_id, id_to_word, word_matrix, top=5, answer=None):
+    '''
+    アナロジー(類推) テキスト通り
+    類似度: queryベクトルを正規化してから内積
+    '''
+    for w in (a, b, c):
+        if not w in word_to_id:
+            print('{0} is not found.'.format(w))
+            return
+    print('\n[analogy] {0}:{1} = {2}:?'.format(a, b, c))
+    a_vec, b_vec, c_vec = word_matrix[word_to_id[a]], word_matrix[word_to_id[b]], word_matrix[word_to_id[c]]
+    query_vec = b_vec - a_vec + c_vec
+    #------------------------------------------------------------------
+    query_vec = normalize(query_vec)
+    similarity = np.dot(word_matrix, query_vec)  # 結果は正規化 -> 内積
+    #------------------------------------------------------------------
+
+    count = 0
+    for i in (-1 * similarity).argsort():  # 大きい方が近い
         if np.isnan(similarity[i]):
             continue
         if id_to_word[i] in (a, b, c):
