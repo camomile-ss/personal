@@ -1,7 +1,8 @@
 # coding: utf-8
 from util import preprocess, create_contexts_target, convert_one_hot
 from trainers import Trainer
-from simple_cbow import SimpleCbow
+#from simple_cbow import SimpleCBOW
+from simple_skip_gram import SimpleSkipGram
 from optimizers import Adam
 #from optimizers import SGD
 
@@ -20,7 +21,8 @@ if __name__ == '__main__':
     target = convert_one_hot(target, vocab_size=vocab_size)
 
     # モデル
-    model = SimpleCbow(vocab_size, hidden_size)
+    #model = SimpleCBOW(vocab_size, hidden_size)
+    model = SimpleSkipGram(vocab_size, hidden_size)
     optimizer = Adam()
     #optimizer = SGD()
 

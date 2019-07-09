@@ -1,8 +1,8 @@
 # coding: utf-8
 from util import preprocess, create_contexts_target
-from dataset import ptb
 from trainers import Trainer
-from cbow import CBOW
+#from cbow import CBOW
+from skip_gram import SkipGram
 from optimizers import Adam
 
 if __name__ == '__main__':
@@ -18,7 +18,8 @@ if __name__ == '__main__':
     contexts, target = create_contexts_target(corpus, window_size=window_size)
 
     # モデル
-    model = CBOW(vocab_size, hidden_size, window_size, corpus)
+    #model = CBOW(vocab_size, hidden_size, window_size, corpus)
+    model = SkipGram(vocab_size, hidden_size, window_size, corpus)
     optimizer = Adam()
 
     # 学習

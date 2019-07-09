@@ -2,7 +2,7 @@
 import numpy as np
 from layers import MatMul, SoftmaxWithLoss
 
-class SimpleCbow:
+class SimpleCBOW:
     def __init__(self, vocab_size, hidden_size):
         # おもみ
         w_in = 0.01 * np.random.randn(vocab_size, hidden_size).astype('f')

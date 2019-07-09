@@ -2,7 +2,8 @@
 from util import create_contexts_target
 from dataset import ptb
 from trainers import Trainer
-from cbow import CBOW
+#from cbow import CBOW
+from skip_gram import SkipGram
 from optimizers import Adam
 import numpy as np
 import pickle
@@ -19,7 +20,8 @@ if __name__ == '__main__':
     contexts, target = create_contexts_target(corpus, window_size=window_size)
 
     # モデル
-    model = CBOW(vocab_size, hidden_size, window_size, corpus)
+    #model = CBOW(vocab_size, hidden_size, window_size, corpus)
+    model = SkipGram(vocab_size, hidden_size, window_size, corpus)
     optimizer = Adam()
 
     # 学習
@@ -34,7 +36,7 @@ if __name__ == '__main__':
     params['word_vecs'] = model.word_vecs.astype(np.float16)
     params['word_to_id'] = word_to_id
     params['id_to_word'] = id_to_word
-    fname = 'cbow_params.pkl'
+    #fname = 'cbow_params.pkl'
+    fname = 'skip_gram_params.pkl'
     with open(fname, 'wb') as f:
         pickle.dump(params, f, -1)
-
