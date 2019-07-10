@@ -4,7 +4,8 @@ import pickle
 from util import most_similar, analogy, analogy_text
 
 if __name__ == '__main__':
-    fname = 'cbow_params.pkl'
+    #fname = 'cbow_params.pkl'
+    fname = 'skip_gram_params.pkl'
     with open(fname, 'rb') as f:
         params = pickle.load(f)
     word_vecs = params['word_vecs']
@@ -17,13 +18,13 @@ if __name__ == '__main__':
         most_similar(query, word_to_id, id_to_word, word_vecs, top=5)
 
     # analogy
-    print('-'*3 + ' (distance) ' + '-' * 46)
+    print('\n-' + ' (distance) ' + '-' * 46)
     analogy('king', 'man', 'queen',  word_to_id, id_to_word, word_vecs, top=30)
     analogy('take', 'took', 'go',  word_to_id, id_to_word, word_vecs)
-    analogy('car', 'cars', 'child',  word_to_id, id_to_word, word_vecs)
-    analogy('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs, top=10)
-    print('-'*3 + ' (text) ' + '-' * 50)
-    analogy_text('king', 'man', 'queen',  word_to_id, id_to_word, word_vecs)
-    analogy_text('take', 'took', 'go',  word_to_id, id_to_word, word_vecs)
-    analogy_text('car', 'cars', 'child',  word_to_id, id_to_word, word_vecs)
-    analogy_text('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs, top=10)
+    analogy('car', 'cars', 'child',  word_to_id, id_to_word, word_vecs, top=10)
+    analogy('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs, top=30)
+    print('\n-' + ' (text) ' + '-' * 50)
+    analogy_text('king', 'man', 'queen',  word_to_id, id_to_word, word_vecs, top=30)
+    analogy_text('take', 'took', 'go',  word_to_id, id_to_word, word_vecs, top=10)
+    analogy_text('car', 'cars', 'child',  word_to_id, id_to_word, word_vecs, top=30)
+    analogy_text('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs)

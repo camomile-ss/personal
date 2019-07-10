@@ -1,0 +1,206 @@
+[top 5]  query: you
+(1) your       similarity: 0.65869140625
+(2) yourself   similarity: 0.6455078125
+(3) someone    similarity: 0.638671875
+(4) anybody    similarity: 0.62841796875
+(5) somebody   similarity: 0.62451171875
+[top 5]  query: year
+(1) month      similarity: 0.63232421875
+(2) earlier    similarity: 0.60302734375
+(3) fiscal     similarity: 0.54150390625
+(4) week       similarity: 0.521484375
+(5) quarter    similarity: 0.51806640625
+[top 5]  query: car
+(1) luxury     similarity: 0.60888671875
+(2) cars       similarity: 0.59326171875
+(3) mazda      similarity: 0.53759765625
+(4) beretta    similarity: 0.52734375
+(5) merkur     similarity: 0.52099609375
+[top 5]  query: toyota
+(1) honda      similarity: 0.6796875
+(2) motor      similarity: 0.6787109375
+(3) lexus      similarity: 0.6767578125
+(4) infiniti   similarity: 0.6650390625
+(5) mazda      similarity: 0.60107421875
+[top 5]  query: cat
+(1) tests      similarity: 0.58935546875
+(2) standardized similarity: 0.53515625
+(3) contemporary similarity: 0.5166015625
+(4) symptoms   similarity: 0.515625
+(5) kidney     similarity: 0.50634765625
+[top 5]  query: music
+(1) rock       similarity: 0.5146484375
+(2) entertaining similarity: 0.490234375
+(3) gets       similarity: 0.475830078125
+(4) musicians  similarity: 0.46728515625
+(5) sassy      similarity: 0.46484375
+
+- (distance) ----------------------------------------------
+
+[analogy] king:man = queen:?
+( 1) trapped: 3.6875
+( 2) chaotic: 3.970703125
+( 3) beings: 3.9765625
+( 4) people: 3.984375
+( 5) loose: 3.9921875
+( 6) cubs: 4.02734375
+( 7) alive: 4.03515625
+( 8) recruiting: 4.05859375
+( 9) dead: 4.0703125
+(10) spy: 4.07421875
+(11) wishes: 4.08203125
+(12) behaved: 4.09765625
+(13) <unk>: 4.109375
+(14) road: 4.11328125
+(15) born: 4.1171875
+(16) just: 4.12109375
+(17) heart: 4.12109375
+(18) morgenzon: 4.125
+(19) nomination: 4.13671875
+(20) outlawed: 4.13671875
+(21) bart: 4.14453125
+(22) asks: 4.14453125
+(23) dunes: 4.1484375
+(24) discarded: 4.15625
+(25) commute: 4.1640625
+(26) democratic: 4.171875
+(27) accomplished: 4.18359375
+(28) mode: 4.18359375
+(29) job: 4.18359375
+(30) gestures: 4.1875
+
+[analogy] take:took = go:?
+( 1) went: 3.451171875
+( 2) back: 3.689453125
+( 3) got: 3.73828125
+( 4) moved: 3.75390625
+( 5) left: 3.7734375
+
+[analogy] car:cars = child:?
+( 1) invariably: 4.0234375
+( 2) ethnic: 4.171875
+( 3) tired: 4.19140625
+( 4) beings: 4.234375
+( 5) campus: 4.25
+( 6) deprived: 4.25390625
+( 7) conception: 4.25390625
+( 8) prints: 4.2578125
+( 9) children: 4.26171875
+(10) older: 4.265625
+
+[analogy] good:better = bad:?
+( 1) sometimes: 3.232421875
+( 2) any: 3.31640625
+( 3) those: 3.34765625
+( 4) all: 3.421875
+( 5) now: 3.423828125
+( 6) minimize: 3.4375
+( 7) calloway: 3.44921875
+( 8) the: 3.451171875
+( 9) making: 3.45703125
+(10) centrust: 3.45703125
+(11) aer: 3.46484375
+(12) banknote: 3.470703125
+(13) though: 3.47265625
+(14) often: 3.474609375
+(15) berlitz: 3.4765625
+(16) even: 3.478515625
+(17) ever: 3.486328125
+(18) if: 3.50390625
+(19) fromstein: 3.50390625
+(20) guterman: 3.505859375
+(21) cluett: 3.521484375
+(22) getting: 3.52734375
+(23) uncomfortable: 3.53125
+(24) <eos>: 3.537109375
+(25) ipo: 3.54296875
+(26) them: 3.564453125
+(27) great: 3.56640625
+(28) hydro-quebec: 3.568359375
+(29) simply: 3.568359375
+(30) not: 3.578125
+
+- (text) --------------------------------------------------
+
+[analogy] king:man = queen:?
+( 1) incest: 2.130859375
+( 2) epicenter: 1.83203125
+( 3) andreas: 1.806640625
+( 4) solidarity: 1.7958984375
+( 5) murder: 1.7666015625
+( 6) charleston: 1.7587890625
+( 7) hero: 1.7451171875
+( 8) rape: 1.732421875
+( 9) landfill: 1.728515625
+(10) god: 1.7236328125
+(11) fault: 1.6708984375
+(12) alive: 1.6630859375
+(13) neglected: 1.6591796875
+(14) candlestick: 1.6513671875
+(15) artist: 1.6337890625
+(16) bridges: 1.6240234375
+(17) haul: 1.6240234375
+(18) duck: 1.62109375
+(19) beings: 1.6181640625
+(20) massacre: 1.603515625
+(21) murdered: 1.6015625
+(22) portrayal: 1.59375
+(23) nomination: 1.591796875
+(24) walks: 1.5888671875
+(25) pregnant: 1.587890625
+(26) fan: 1.5849609375
+(27) mystery: 1.572265625
+(28) advocate: 1.5673828125
+(29) discarded: 1.55859375
+(30) testified: 1.55859375
+
+[analogy] take:took = go:?
+( 1) tall: 1.5712890625
+( 2) ran: 1.55078125
+( 3) plunged: 1.5166015625
+( 4) bounced: 1.4677734375
+( 5) sat: 1.462890625
+( 6) walked: 1.447265625
+( 7) forth: 1.4404296875
+( 8) went: 1.40625
+( 9) thinks: 1.3828125
+(10) runs: 1.37109375
+
+[analogy] car:cars = child:?
+( 1) rape: 2.53515625
+( 2) adults: 2.025390625
+( 3) incest: 1.912109375
+( 4) versions: 1.697265625
+( 5) disobedience: 1.6962890625
+( 6) patients: 1.6240234375
+( 7) abortion: 1.62109375
+( 8) disabilities: 1.6171875
+( 9) husband: 1.6142578125
+(10) mother: 1.6142578125
+(11) children: 1.5791015625
+(12) conception: 1.548828125
+(13) males: 1.54296875
+(14) models: 1.5341796875
+(15) pregnancy: 1.529296875
+(16) pregnant: 1.521484375
+(17) daughters: 1.5146484375
+(18) abortions: 1.5087890625
+(19) tired: 1.50390625
+(20) women: 1.4921875
+(21) portrayal: 1.4833984375
+(22) non-violent: 1.478515625
+(23) beings: 1.4755859375
+(24) images: 1.4736328125
+(25) shall: 1.4697265625
+(26) birth: 1.466796875
+(27) medicaid: 1.453125
+(28) achievement: 1.4482421875
+(29) refugees: 1.4443359375
+(30) therapy: 1.439453125
+
+[analogy] good:better = bad:?
+( 1) worse: 1.6416015625
+( 2) batman: 1.544921875
+( 3) minimize: 1.5107421875
+( 4) risky: 1.5048828125
+( 5) location: 1.470703125
