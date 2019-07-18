@@ -1,7 +1,7 @@
 # coding: utf-8
 #from route_type import combi_rec
 
-def combination(table):
+def combinations(table):
     '''
     リストのリストの、すべての組み合わせを返す。再帰処理。
     e. g.) input:  [[1,2,3], [4,5], [6,7], [8]]
@@ -12,14 +12,14 @@ def combination(table):
     '''
     if len(table)==1:
         return [[x] for x in table[0]]
-    new_combi = []
+    new_combis = []
     for add in table[-1]:
-        for combi in combination(table[:-1]):
+        for combi in combinations(table[:-1]):
             combi.append(add)
-            new_combi.append(combi)
-    return new_combi
+            new_combis.append(combi)
+    return new_combis
 
 #table = [[0,5], [4], [0,5], [6]]
 table = [[1,2,3], [4,5], [6,7], [8]]
-combinations = combination(table)
-print(combinations)
+combis = combinations(table)
+print(combis)
