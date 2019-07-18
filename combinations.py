@@ -12,14 +12,15 @@ def combinations(table):
     '''
     if len(table)==1:
         return [[x] for x in table[0]]
-    new_combis = []
-    for add in table[-1]:
-        for combi in combinations(table[:-1]):
-            combi.append(add)
-            new_combis.append(combi)
-    return new_combis
+    combis = []
+    for a in table[-1]:
+        for c in combinations(table[:-1]):
+            c.append(a)
+            combis.append(c)
+    return combis
 
-#table = [[0,5], [4], [0,5], [6]]
-table = [[1,2,3], [4,5], [6,7], [8]]
-combis = combinations(table)
-print(combis)
+if __name__ == '__main__':
+    #table = [[0,5], [4], [0,5], [6]]
+    table = [[1,2,3], [4,5], [6,7], [8]]
+    combis = combinations(table)
+    print(combis)
