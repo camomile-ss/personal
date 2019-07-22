@@ -27,3 +27,30 @@ class RNN:
         self.grads[2][...] = db
 
         return dx, dh_prev
+
+class timeRNN:
+    def __init__(self, wh, wx, b, stateful=False):
+        self.params = [wh, wx, b]
+        self.grads = [np.zeros_like(wh), np.zeros_like(wx), np.zeros_like(b)]
+        self.layers = None
+        self.h, self.dh = None, None
+        self.stateful = stateful
+
+    def forward(self, xs):
+        wh, wx, b = self.params
+        N, T, D = xs.shape  # バッチサイズ, 時間サイズ, データの次元
+        D, H = wh.shape  # データの次元, 隠れ状態の次元
+
+        self.layers = []
+        hs = np.empty((N, T, H), drype='f')
+
+        if not self.statefull or self.h is None:
+            self.h = np.zeros((N, H), dtype='f')
+
+        for t in range(T):
+            layer = RNN(*self.params)
+            self.h = layer.forward(xs[:, t, :], self.h)
+            hs [:, t, :] = self.h
+            self.layers.append(layer)
+
+        return hs
