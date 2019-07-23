@@ -39,7 +39,7 @@ class timeRNN:
     def forward(self, xs):
         wh, wx, b = self.params
         N, T, D = xs.shape  # バッチサイズ, 時間サイズ, データの次元
-        D, H = wh.shape  # データの次元, 隠れ状態の次元
+        D, H = wx.shape  # データの次元, 隠れ状態の次元
 
         self.layers = []
         hs = np.empty((N, T, H), drype='f')
@@ -50,7 +50,7 @@ class timeRNN:
         for t in range(T):
             layer = RNN(*self.params)
             self.h = layer.forward(xs[:, t, :], self.h)
-            hs [:, t, :] = self.h
+            hs[:, t, :] = self.h
             self.layers.append(layer)
 
         return hs
