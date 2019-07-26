@@ -42,7 +42,7 @@ class timeRNN:
         D, H = wx.shape  # データの次元, 隠れ状態の次元
 
         self.layers = []
-        hs = np.empty((N, T, H), drype='f')
+        hs = np.empty((N, T, H), dtype='f')
 
         if not self.statefull or self.h is None:
             self.h = np.zeros((N, H), dtype='f')
@@ -54,3 +54,27 @@ class timeRNN:
             self.layers.append(layer)
 
         return hs
+
+    def backward(self, dhs):
+        wh, wx, b = self.params
+        N, T, H = dhs.shape  # バッチサイズ, 時間サイズ, 隠れ状態の次元
+        D, H = wx.shape  # データの次元, 隠れ状態の次元
+
+        dxs = np.empty((N, T, D), dtype='f')
+        dh = 0
+        grads = [0, 0, 0]  # 勾配加算用
+
+        for t in range(T)[::-1]:
+            layer = self.layers[t]
+            dx, dh = layer.backward(dhs[:, t, :] + dh)
+            dxs[:, t, :] = dx
+
+            for i, grad in enumerate(layer.grads):
+                grads[i] += grad
+
+        for i, grad in enumerate(grads):
+            self.grads[i][...] = grad
+
+        self.dh = dh
+
+        return dxs
