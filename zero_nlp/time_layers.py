@@ -1,13 +1,13 @@
 # coding: utf-8
 import numpy as np
-from layers import MatMul
+from layers import MatMul, Embedding
 
 class RNN:
-    def __init__(self, wh, wx, b):
-        self.matmul_h = MatMul(wh)
+    def __init__(self, wx, wh, b):
         self.matmul_x = MatMul(wx)
-        self.params = self.matmul_h.params + self.matmul_x.params + [b]
-        self.grads = self.matmul_h.grads + self.matmul_x.grads + [np.zeros_like(b)]
+        self.matmul_h = MatMul(wh)
+        self.params = self.matmul_x.params + self.matmul_h.params + [b]
+        self.grads = self.matmul_x.grads + self.matmul_h.grads + [np.zeros_like(b)]
         self.h = None
 
     def forward(self, x, h_prev):
@@ -28,16 +28,22 @@ class RNN:
 
         return dx, dh_prev
 
-class timeRNN:
-    def __init__(self, wh, wx, b, stateful=False):
-        self.params = [wh, wx, b]
-        self.grads = [np.zeros_like(wh), np.zeros_like(wx), np.zeros_like(b)]
+class TimeRNN:
+    def __init__(self, wx, wh, b, stateful=False):
+        self.params = [wx, wh, b]
+        self.grads = [np.zeros_like(wx), np.zeros_like(wh), np.zeros_like(b)]
         self.layers = None
         self.h, self.dh = None, None
         self.stateful = stateful
 
+    def set_state(self, h):
+        self.h = h
+
+    def reset_state(self):
+        self.h = None
+
     def forward(self, xs):
-        wh, wx, b = self.params
+        wx, wh, b = self.params
         N, T, D = xs.shape  # バッチサイズ, 時間サイズ, データの次元
         D, H = wx.shape  # データの次元, 隠れ状態の次元
 
@@ -56,7 +62,7 @@ class timeRNN:
         return hs
 
     def backward(self, dhs):
-        wh, wx, b = self.params
+        wx, wh, b = self.params
         N, T, H = dhs.shape  # バッチサイズ, 時間サイズ, 隠れ状態の次元
         D, H = wx.shape  # データの次元, 隠れ状態の次元
 
@@ -76,5 +82,71 @@ class timeRNN:
             self.grads[i][...] = grad
 
         self.dh = dh
+
+        return dxs
+
+class TimeEmbedding:
+    def __init__(self, w):
+        self.params = [w]
+        self.grads = [np.zeros_like(w)]
+        self.layers = None
+
+    def forward(self, idxs):
+        w, = self.params
+        N, T = idxs.shape
+        V, D = w.shape  # 語彙数, 分散表現の次元数
+
+        self.layers = []
+        ys = np.empty((N, T, D), dtype='f')
+
+        for t in range(T):
+            layer = Embedding(w)
+            ys[:, t, :] = layer.forward(idxs[:, t])
+            self.layers.append(layer)
+
+        return ys
+
+    def backward(self, dys):
+        N, T, D = dys.shape
+
+        grad = 0
+        for t in range(T):
+            layer = self.layer[t]
+            layer.backward(dys[:, t, :])
+            grad += layer.grads[0]
+        self.grads[0][...] = grad
+
+        return None
+
+class TimeAffine:
+    def __init__(self, w, b):
+        self.params = [w, b]
+        self.grads = [np.zeros_like(w), np.zeros_like(b)]
+        self.xs = None
+
+    def forward(self, xs):
+        w, b = self.params
+        N, T, D = xs.shape
+
+        self.xs = xs
+        xs_ = xs.reshape(N*T, -1)
+        ys_ = np.dot(xs_, w) + b
+        ys = ys_.reshape(N, T, -1)
+        return ys
+
+    def backward(self, dys):
+        w, b = self.params
+        N, T, D = self.xs.shape
+
+        dys_ = dys.reshape(N*T, -1)
+        xs_ = self.xs.reshape(N*T, -1)
+
+        dxs_ = np.dot(dys_, w.T)
+        dxs = dxs_.reshape(N, T, -1)
+        dw = np.dot(xs_.T, dys_)
+        db = np.sum(dys_, axis=0)
+
+        self.grads[0][...] = dw
+        self.grads[1][...] = db
 
         return dxs
