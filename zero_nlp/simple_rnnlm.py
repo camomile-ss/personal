@@ -15,28 +15,28 @@ class SimpleRnnlm:
 
         self.layers = [
                 TimeEmbedding(embed_w),
-                TimeRNN(rnn_wx, rnn_wh, rnn_b),
+                TimeRNN(rnn_wx, rnn_wh, rnn_b, stateful=True),
                 TimeAffine(affine_w, affine_b)
                 ]
         self.loss_layer = TimeSoftmaxWithLoss()
+        self.rnn_layer = self.layers[1]
 
         self.params, self.grads = [], []
         for l in self.layers:
             self.params += l.params
             self.grads += l.grads
 
-    def forward(self, idxs, ts):
-        time_embedding_layer, time_rnn_layer, time_affine_layer = self.layers
-        xs = time_embedding_layer.forward(idxs)
-        hs = time_rnn_layer.forward(xs)
-        ys = time_affine_layer.forward(hs)
-        loss = self.loss_layer.forward(ys)
+    def forward(self, xs, ts):
+        for l in self.layers:
+            xs = l.forward(xs)
+        loss = self.loss_layer.forward(xs)
         return loss
 
-    def backward(self, dl):
-        time_embedding_layer, time_rnn_layer, time_affine_layer = self.layers
-        dys = self.loss_layer.backward(dl)
-        dhs = time_affine_layer.backward(dys)
-        dxs = time_rnn_layer.backward(dhs)
-        time_embedding_layer.backward(dxs)
-        return None
+    def backward(self, dl=1):
+        dxs = self.loss_layer.backward(dl)
+        for l in self.layers[::-1]:
+            dxs = l.backward(dxs)
+        return dxs
+
+    def reset_state(self):
+        self.rnn_layer.reset_state()
