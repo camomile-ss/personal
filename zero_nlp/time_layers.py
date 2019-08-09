@@ -22,7 +22,7 @@ class RNN:
         db = np.sum(dt, axis=0)
 
         dh_prev = self.matmul_h.backward(dt)
-        dx = self.matmul_x.badkward(dt)
+        dx = self.matmul_x.backward(dt)
 
         self.grads[2][...] = db
 
@@ -50,7 +50,7 @@ class TimeRNN:
         self.layers = []
         hs = np.empty((N, T, H), dtype='f')
 
-        if not self.statefull or self.h is None:
+        if not self.stateful or self.h is None:
             self.h = np.zeros((N, H), dtype='f')
 
         for t in range(T):
@@ -111,7 +111,7 @@ class TimeEmbedding:
 
         grad = 0
         for t in range(T):
-            layer = self.layer[t]
+            layer = self.layers[t]
             layer.backward(dys[:, t, :])
             grad += layer.grads[0]
         self.grads[0][...] = grad

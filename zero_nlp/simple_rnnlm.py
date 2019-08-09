@@ -29,7 +29,7 @@ class SimpleRnnlm:
     def forward(self, xs, ts):
         for l in self.layers:
             xs = l.forward(xs)
-        loss = self.loss_layer.forward(xs)
+        loss = self.loss_layer.forward(xs, ts)
         return loss
 
     def backward(self, dl=1):
