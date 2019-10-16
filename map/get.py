@@ -9,7 +9,7 @@ from address2coordinates import get_lat_lon_from_address
 
 if __name__ == '__main__':
 
-    addresses = ['国分寺駅', '東京都国立市中区３－１', '新座市道場2-1-10', '埼玉大学']
+    addresses = ['国分寺駅', '東京都国立市中区３－１', '北朝霞駅']
 
     coords = get_lat_lon_from_address(addresses)
 
