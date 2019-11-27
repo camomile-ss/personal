@@ -1,0 +1,12 @@
+PoEとは<br>規格は	Power over Ethernet<br>UTPを使って電源供給<br>IEEE802.3af, at(大電力)
+CSMA/CDとは	Carrier Sense: キャリア信号検知<br>Multiple Access: 多重アクセス(データを全員に送信)<br>Collision Detection: 衝突が起こったら検出して再送
+PLCとは	Power Line Communications<br>電力線で通信
+CSMA/CAとは	Carrier Sense: キャリア信号検知<br>Multiple Access: 多重アクセス(データを全員に送信)<br>Collision Avoidance: その通信終了後、ランダムな待ち時間(バックオフ制御時間)とって送信
+チャネルボンディング	隣り合う帯域のチャネルを二つ束ねる。(無線LAN)
+隠れ端末問題の解決策は	RTS/CTS<br>Request to Send / Clear to Send (送るデータの長さ情報。送信抑止時間を含む。)<br>送信元端末がAPにRTSを送り、APが全員にCTSを送る。他端末はその長さの間送信しない。
+短距離無線通信の規格	IEEE802.15分科会<br>・Bluetooth<br>IEEE802.15.1<br>ヘッドフォン、キーボードなどの小型機器で使用。1つのマスタとmax7つのスレーブでスター型ネットワーク。<br><br>・ZigBee<br>IEEE802.15.4<br>センサネットワーク(複数のセンサ協調)
+PPPのプロトコル	[NCP] Network Control Protocol<br>上位層(ネットワーク層)に関するやりとり。上位層がIPのときはIPCP<br><br>[LCP] Link Control Protocol<br>コネクション確立・切断、ユーザ認証<br><br>[IPCP]<br>IPアドレスの自動割り当てなど<br><br>[PAP] Password Authentication Protocol<br>ユーザidとパスワードで認証<br><br>[CHAP] Challenge Handshake Protocol<br>チャレンジレスポンス方式の認証。サーバが毎回異なるチャレンジを送る。ユーザはチャレンジとパスワードの演算結果を送る。
+PPPのレイヤ	データリンクをうのみ。物理層のプロトコルは別に必要。逆にいろんな物理層で使える。
+PPPoEとは	PPP over Ethernet<br>イーサネットには認証・コネクション管理・課金管理の機能がないため、PPPの機能を合わせて利用。<br>PPPのフレームをイーサネットのフレームでカプセル化。
+MPLS	Multi Protocol Label Switching<br>IP-VPNで、IPパケットにラベルと呼ばれる情報を付加して通信を制御。
+IP	<ul><li>コネクション・レス</li><li>役割: 識別(IPアドレス)、ルーティング、パケット識別・再構築</li><li>IPアドレス: 32ビット、クラスフルアドレッシング(ネットワークアドレス・ホストアドレス)、サブネットマスク</li></ul>
