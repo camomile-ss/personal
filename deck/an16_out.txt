@@ -1,0 +1,5 @@
+無線LANの異なる規格での相互通信可否	不可。同じ周波数帯(bとg)は可能。	network
+IEEE802.11n	11a/gの54Mbpsから最大600Nbpsまで拡張。2.4GHz/5GHz<br>[高速化技術]<ul><li>MIMO: アンテナを束ねる。チャンネルはそのまま。</li><li>チャネルボンディング: チャンネルを束ねる。通常20MHz幅->40MHz幅</li><li>フレームアグリゲーション: 複数のフレームをまとめて送る。</li></ul>	network
+IEEE802.11b(2.4GHz帯)ではチャネルボンディングを使わないことがある。なぜか。	電波干渉で使えるチャネル数が3から2or1に減り、ネットワーク全体のスループットがあまり上がらない。	network
+IEEE802.11ac	最大6.9Gbpsの規格。5GHz帯のみ。<ul><li>MIMOのアンテナ多重 8(11nは4)</li><li>チャネルボンディング 160MHz幅</li></ul>	network
+無線LANの暗号化の規格	<table border='1', bordercolor='#000000', cellspacing='0', cellpadding='2'>  <tr><th></th><th>暗号化の仕組み</th><th>認証の仕組み</th><th>改ざん検出</th></tr>  <tr><td>WEP</td><td>(脆弱性あり)</td><td></td><td></td></tr>  <tr><td>WPA</td><td>TKIP</td><td>IEEE802.1x</td><td>MIC</td></tr>  <tr><td>WPA2</td><td>AES</td><td>IEEE802.1x</td><td>CCMP</td></tr></table>	network
