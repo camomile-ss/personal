@@ -1,0 +1,7 @@
+tsvのカラム入れ替え	cat xxx.txt | awk '{print $1,$3,$2}' FS='\t' OFS'\t' >yyyy.txt	command
+yum アンインストール	yum remove xxxxxxx	command
+pythonのround関数	偶数への丸め。<br>端数が0.5より小さいなら切り捨て、端数が0.5より大きいなら切り上げ、端数がちょうど0.5なら切り捨てと切り上げのうち結果が偶数となるほうへま埋める。<br>JIS Z 8401 規則A	python program
+商、余り	quotient, remainder	english
+トリビア	trivial ささいな	english
+防止	prevention	english
+防ぐ	prevent	english

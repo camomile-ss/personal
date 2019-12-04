@@ -1,0 +1,5 @@
+APOPとは。普及していないのはなぜか。	aUthentication Post Office Protocol<br>パスワードを暗号化する。ただしメール本文は暗号化されない。また、かつての主要メールソフトがAPOPに対応していない。	network
+IMAP4とは	Internet Message Access Protocol ver4<br>PCでメールを読む時に、ダウンロードせずにサーバ上で保管管理。未読管理やメールの削除、フォルダ振り分け状態などが、どのPCからでも同一に見えるようにできる。	network
+POP3s, IMAP4s, SMTPs のポート番号	POP3s: 995 (POP3: 110)<br>IMAP4s: 993 (IMAP4: 143)<br>SMTPs: 465 (SMTP: 25)<br># s = over SSL	network
+over SSL と STARTTLS の違い	通信そのものをSSLで暗号化<ul><li>over SSL: 最初からSSLによって、POP3/IMAP4/SMTPをくるんで通信を始める</li><li>STARTTLS: 途中でSSL(TLS)に切り替える。ポート番号はPOP3/IMAP4/SMTPと同じで済む。</li></ul>	network
+2者間認証と3者間認証	2者間認証: authentication<br>3者間認証: certification	network english
