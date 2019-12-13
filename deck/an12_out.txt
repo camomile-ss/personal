@@ -1,7 +1,0 @@
-STPの目的2つ	<ul><li>ループの回避</li><li>経路の冗長化(信頼性向上)</li></ul>	network
-STPのブロッキングポートを決める手順	<ol><li>ルートブリッジ決める</li><li>ルートポート (各ブリッジのルートブリッジに一番近いポート)</li><li>代表ポート (各セグメントのルートブリッジに一番近いポート)</li><li>以上に当てはまらないポートをブロッキングポートに</li></ol>	network
-STPのデメリット	PCを接続しても直ちに通信できない	network
-LA<ul><li>フルネーム</li><li>Ciscoでの別名</li><li>目的</li></ul>	Link Aggregation<br>Cisco: FEC(Fast Ether Channel), GEC(Gigabit Ether Channel)<br>目的: 帯域拡大、冗長化	network
-STPに比べたLAの利点	<ul><li>障害が発生しても、通信の中断が比較的短時間</li><li>設定・運用が簡単</li><li>帯域を有効活用できる</li></ul>	network
-PPPを拡張したプロトコル	EAP(Extensible Authentication Protocol)	network
-WANサービスの例	<h4>レイヤ1</h4>専用線, ADSL<h4>レイヤ2</h4>広域イーサネット<h4>レイヤ3</h4>IP-VPN, インターネットVPN	network

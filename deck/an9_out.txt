@@ -1,7 +1,0 @@
-IPv4, IPv6 共存技術	トンネリング、デュアルスタック、トランスレータ	network
-SNMP	Simple network managemant protocol<br>TCP/IPネットワークに接続された通信機器を、ネットワーク経由で監視・制御するためのアプリケーション層プロトコル。<br>管理する側: SNMPマネージャ<br>管理される側: SNMPエージェント	network
-ポーリング	SNMPマネージャから、SNMPエージェントにリクエストを送信して情報を取得。	network
-トラップ	SNMPエージェントからSNMPマネージャに、突発的なエラーに関する情報を通知。	network
-IPsec概要	IP + セキュリティ。<ol><li>認証</li><li>暗号化</li><li>トンネリング</li></ol>VPNでよく使われる。	network
-SCSI	Small Computer System Interface<br>コンピュータと周辺機器の接続方式の規格。1986年にANSIが標準化。すかじー。<br>今はUSBに取って代わられてる。	network
-イーサネットのフレーム構造を書け	<ul><li>宛先MAC (6オクテット)</li><li>送信元MAC (6)</li><li>タイプ (2)</li><li>データ (46~1500)</li><li>FCS (4)</li></ul>(FCS: Frame Check Sequence)	network

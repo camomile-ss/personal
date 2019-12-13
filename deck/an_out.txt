@@ -1,2 +1,0 @@
-サーバのキャパシティ増強の方法	<ul><li>スケールアウト: 台数を増やす</li><li>スケールアップ: サーバ自体を増強…メモリとかパーツ交換、サーバ自体を新機種に、など</li></ul>	network
-IEEEについて	the institute of Electrical and Electronics Engineers<br>米電気電子技術者協会<br><br><ul><li>IEEE802委員会: LAN技術</li><li>IEEE802.3分科会: イーサネット</li><li>IEEE802.11分科会: 無線LAN</li><li>IEEE802.1分科会: 上位プロトコル 認証とか</li></ul>	network
