@@ -1,0 +1,23 @@
+BGP (BGP-4) 概要	Border Gateway Protocol<br>AS間で利用するルーティングプロトコル<br>経路情報交換はTCP(RIP, OSPFはUDP)<br>経路制御はパスベクタ型	network
+EBGPとIBGP	External BGP, Internal BGP<br>本来BGPはAS間のルーティングプロトコルなのでEBGPが使われるが、異なるAS間の接続にはAS内でもBGPを動作させる必要があり、そのためのプロトコルがIBGP。	network
+HTTPのメソッド 3つ	(8つ中の3つ)<ul><li>GET: データを取得(web閲覧)</li><li>POST: データを送信(掲示板書込みなど)</li><li>CONNECT: proxyに接続する際に利用</li></ul>	network
+DHCP	Dynamic Host Configuration Protocol<br>下記情報をDHCPサーバから自動的に取得しPCに設定するためのプロトコル<ul><li>IPアドレスなどのネットワーク接続に必要な情報</li><li>リース期間(IPアドレスの有効時間を示す)</li><li>サブネットマスクなどのオプション情報</li></ul>	network
+DHCPメッセージのやり取り	<ol><li>DHCP Discover (クライアントからブロードキャスト)</li><li>DHCP Offer (DHCPサーバからクライアントへユニキャスト)</li><li>DHCP Request (クライアントからブロードキャスト: DHCPサーバが複数あることもあるので)</li><li>DHCP Ack (DHCPサーバからクライアントへユニキャスト)</li></ol>	network
+DHCPリレーエージェントはどのような時に必要か	DHCPサーバが別のセグメントにありそれに取得要求を送るとき	network
+DHCPサーバは複数のセグメントのリース範囲からどうやって払い出すIPを決めるか。	DHCPリレーエージェントで送られるパケットには、リレーエージェントが設定されたルータのDHCPクライアント側のIPアドレス情報が入っている。それと同一セグメントのIPアドレスを払い出す	network
+DHCPスヌーピング	SWの機能。DHCPメッセージをのぞき見。<ul><li>正規のDHCPサーバを接続するポートを指定(不正なDHCPサバのIPアドレス払い出しを防止)</li><li>正規のDHCPサーバからIPアドレスを割り当てたPCだけを通信させる(勝手に固定IPアドレスを設定したPCの接続を防ぐ)</li></ul>	network
+DNS	Domain Name System<br>多数のDNSサーバで構成される分散型データベース。<br>ルートDNSサーバを頂点とし、ドメイン名前空間と呼ばれるツリー構造。<br>ルートDNSサーバの配下にドメイン名に対応したDNSサーバ。<ul><li>DNSサーバに関する情報は上位階層のドメイン名を管理するDNSサーバが保持</li><li>ホストに関する情報はその所属するドメイン名を管理するDNSサーバが保持。</li></ul>一つのドメインを管理するDNSサーバは通常2台。プライマリサーバ、セカンダリサーバ。	network
+FQDN	Fully Qualified Domain Name (完全修飾ドメイン名)<br>特定のホストを表現したドメイン名	network
+DNSのリソースレコードの種類	<ul><li>SOAレコード (Start of Authority)</li><li>Aレコード (Address)</li><li>MXレコード (Mail exchanger)</li><li>NSレコード (Name Server)</li><li>PTRレコード (Pointer)</li><li>CNAMEレコード (Canonical name)</li></ul>	network
+SOAレコードの内容	Start of Authority<br>自分が管理するゾーンの情報	network
+Aレコードの内容	Address<br>ホスト名に対するIPアドレス	network
+MXレコードの内容	Mail exchange<br>そのドメインのメールサーバのホスト名(FQDN)を指定。<br>アドレスを知るにはAレコードも必要	network
+NSレコードの内容	Name Server<br>そのドメインと、下位ドメインのDNSサーバのホスト名(FQDN)を指定。なので必ずAレコード必要。	network
+リゾルバとは	DNSで、ネームサーバに問合せを行うクライアント	network
+DNSの問い合わせの種類	<ul><li>[再帰問合せ]<br>クライアントのリゾルバからDNSサーバ(フルサービスリゾルバ)に問合せ。最終的な結果が返る。</li><li>[反復問合せ]<br>ルートから順に下位までネームサーバ(コンテンツサーバ)に繰り返し問合せ</li></ul>	network
+ゾーン転送とは	プライマリDNSサーバで保持しているゾーン情報をセカンダリサーバに同期させること。	network
+DNSキャッシュサーバとは	ドメイン情報を管理せず、キャッシュ情報を保有してPCからの問い合わせに答えるDNSサーバ。<br>問い合わせ先のDNSサーバをフォワーダとして設定。キャッシュに情報がなければフォワーダに問合せを転送。	network
+ダイナミックDNS	クライアントが自分に割り当てられたIPアドレスをDNSサーバに通知、DNSサーバはその通知に基づきゾーン情報を修正。PCのIPアドレスが変わってもそのPCには同じホスト名でアクセスできる。	network
+SMTPとは。欠点は。	Simple Mail Transfer Protocol メール送信プロトコル<br>認証をしない。	network
+SMTPの欠点を解決したプロトコル	<ul><li>POP before SMTP<br>POP認証が終わったあと一定時間だけSMTPの通信を許可</li><li>SMTP AUTH<br>ユーザ名とパスワードで認証を行う</li></ul>	network
+POP3とは。問題点は。	Post office protocol v.3<br>メールサーバのメールボックスから電子メールを取り出すときに使用するプロトコル。<br>問題点は<ul><li>メールがサーバに残らないので障害に備えてバックアップ必要</li><li>複数のPCで同じメールを見れない。</li><li>パスワードが平文で流れる。</li></ul>	network

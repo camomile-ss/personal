@@ -1,0 +1,5 @@
+SSLの開発元	ネットスケープコミュニケーションズ社	network
+HTTPS	HTTP over SSL<br>通信を暗号化するためにSSLの証明書を使う	network
+SSLの目的3つ	盗聴, なりすまし, 改ざん の防止	network
+SSLとTLS	SSLをRFCで標準化し機能付加したのがTLS。<br>2014年にSSLv3に重大な脆弱性が見つかり、SSLを無効にしてTLSを使うことが推奨。<br>SSLといいながら実際はTLS、という状態になりそう。	network
+HTTPSのポート番号	443	network

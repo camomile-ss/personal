@@ -1,0 +1,2 @@
+無線LANの認証方式	<ol><li>WEPによる認証</li><li>WPA-PSK: 事前共有鍵(pre-shared-key)</li><li>MACアドレス認証</li><li>web認証</li><li>EAP(IEEE802.1x認証)<ul><li>PEAP: ユーザID/パスワードでクライアント認証</li><li>EAP-TSL: クライアント証明書が必要</li></ul></li></ol>	network
+ICMPはTCPかUDPか	どちらでもない。<br>IPヘッダのプロトコル番号<ul><li>ICMP: 1</li><li>TCP: 6</li><li>UDP: 17</li></ul>	network

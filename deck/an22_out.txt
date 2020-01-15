@@ -1,0 +1,24 @@
+外部メールサーバと内部メールサーバで動作させるメールサービス	<table border='1', bordercolor='#000000', cellspacing='0', cellpadding='2'>  <tr><td>外部メールサーバ</td><td>送信サービス(Sendmail, Postfix など)</td></tr>  <tr><td>内部メールサーバ</td><td>送信サービス(Sendmail, Postfix など)<br>受信サービス(dovecot など)</td></tr></table>	network
+メールシステムの構成	DMZ内に外部メールサーバ(中継メールサーバ)、内部セグメント内に内部メールサーバ<ul><li>外部メールサーバは外部/内部からのメールを内部/外部に転送。メールボックスは持たない。</li><li>内部メールサーバは内部からのメールを外部メールサーバに転送。メールボックスにメールを蓄積、PCからのPOP3などのメール受信プロトコルに応答。</li></ul>	network
+メールヘッダのReceivedについて<ul><li>配送ルートの記載順</li><li>どこみればいいか</li></ul>	記載順は下から上。<br>byで示されたサーバを見ればいい。	network
+MIMEとは	Multipurpose Internet Mail Extensions<br>電子メールで、静止画・動画・音声などの様々な情報を送ることができる仕組み。	network
+電子メールのセキュリティリスク対策(1)メール全体<br>メール本文が暗号化されていない	S/MIME, SMTPS	network
+電子メールのセキュリティリスク対策(2)送信メールプロトコル SMTP<br>認証なしでメールを送信できてしまう	POP before SMTP, SMTP AUTH	network
+電子メールのセキュリティリスク対策(3)送信メールプロトコル SMTP<br>送信元が詐称される可能性がある	SPF, DKIM	network
+電子メールのセキュリティリスク対策(4)送信メールプロトコル SMTP<br>大量のSPAMメールが送信される	OP25B	network
+電子メールのセキュリティリスク対策(5)受信メールプロトコル POP3<br>認証パスワードが暗号化されない	APOP, POP3s	network
+SPFとは	Sender Policy Framework<br>送信メールサーバの正当性を受信メールサーバ側で確認する方法。<br>送信元ドメインのDNSゾーンファイルにSPFレコードを追加、受信メールサーバはそのSPFレコードに含まれるIPアドレスを確認する。	network
+DKIMとは	Domain Key Identified Mail<br>送信メールサーバでディジタル署名を電子メールのヘッダに付与、受信メールサーバで検証する。	network
+SPAM対策の全体像	<table border='1', bordercolor='#000000', cellspacing='0', cellpadding='2'>  <tr><td>(1)送信メールサーバ</td><td>ユーザを認証し不正なメールを送信させない</td><td>SMTP AUTH<br>POP before SMTP</td></tr>  <tr><td>(2)プロバイダ</td><td>不正なメール通信を拒否</td><td>OP25B</td></tr>  <tr><td>(3)SPAM対策機</td><td>メールのヘッダや本文を解析、SPAMメールをブロック</td><td>ブラックリスト</td></tr>  <tr><td>(4)受信メールサーバ</td><td>送信者認証し、SPAMメールを受け取らない</td><td>SPF(ドメイン認証)<br>DKIM(電子署名による認証)</td></tr></table>	network
+OP25Bとは	Outbound Port 25 Blocking<br>ISP管理下の動的IPアドレスからの電子メール送信について、管理外ネットワークのメールサーバへのTCPポート25番(SMTP)への通信を禁止すること。<br>自ISP内のメールサーバへは25番ポートで利用できる。外のメールサーバへは、サブミッションポート587を使ったSMTP AUTHでないと送信できない。	network
+FTPとは	File Transfer Protocol<br>FTPサーバに対し、FTPクライアントに入れたソフトからファイルをアップロード・ダウンロードする際に使う。<br>制御用に21番ポート、データ転送用に20番ポートの二つのコネクションを用い、データ転送中でも制御コマンドを送信できる。	network
+FTPのセキュリティ	FTPではデータだけでなく認証データ(ID/パスワード)も平文で流れる。特にインターネット環境では盗聴の恐れ。<br>SFTP: FTPをSSHで暗号化<br>FTPS: FTPをSSLで暗号化	network
+SSLとSSH	<ul><li>SSL (Secure Sockets Layer)<br>インターネット上の通信を暗号化</li><li>SSH (Secure Shell)<br>通信が暗号化されるtelnet(遠隔操作用)</li></ul>	network
+TFTPとは	Trivial FTP<br>簡易型ファイル転送プロトコル<ul><li>ユーザ認証しない</li><li>TCPでなくUDPを利用</li></ul>	network
+プロキシサーバの自動設定ファイルの拡張子	.pac (proxy auto config)	network
+ゾーン転送の手順、タイミング	リフレッシュの間隔でセカンダリからプライマリにゾーン転送を要求、更新があれば転送。<br>ほかに、セカンダリが起動したとき、プライマリからNOTIFYメッセージ(更新通知)を受け取った時にもゾーン転送要求が行われる。	network
+プロキシサーバとは。目的は。	クライアントからのインターネットアクセス(HTTP通信)を代理する。目的は<ol><li>セキュリティ強化<ul><li>サーキットゲートウェイ型ファイアウォールとしてのセキュリティ機能</li><li>補足的に、FWでインターネットへの接続許可をproxyに限定すれば、マルウェアが外部に出ることを防げる。</li></ul></li><li>キャッシュによる帯域効率化と高速化</li></ol>	network
+組織内のTCP/IPネットワークにあるクライアントが、プロキシサーバ、ルータ、インターネットを経由して組織外のwebサーバを利用するとき、この通信のTCPコネクションが設定されるのはどこか。	<ul><li>クライアントとプロキシサーバ間</li><li>プロキシサーバとwebサーバ間</li></ul>	network
+HTTPSによる暗号化通信をプロキシサーバはどうやって中継するか。	PCはプロキシサーバに対しHTTPSのセッションを中継せず透過させるように依頼するCONNECTメソッドを使用する。透過してしまうので、プロキシサーバによるセキュリティチェックやウィルスチェックは行われない。	network
+復号機能をもつプロキシサーバの場合のHTTPS通信	PCからのCONNECT要求を受信し応答した後、HTTPS通信をプロキシサーバでいったん終端し通信を復号する。セキュリティチェック等行ってから、プロキシサーバとwebサーバの間でHTTPS通信を行う。<br>このとき、利用者のブラウザにはプロキシサーバの証明書が表示される。	network
+リバースプロキシとは	外部から内部への通信を代理する。<br>代表例はSSL-VPNを使ったリモートアクセス。外部(外出先や自宅)から内部(社内LAN)にSSL-VPN装置経由でアクセスする。	network

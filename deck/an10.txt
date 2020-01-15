@@ -1,0 +1,8 @@
+VLANが付加された時のイーサネットフレーム構造	<ul><li>宛先MACアドレス</li><li>送信元MACアドレス</li><li>802.1Qヘッダ</li><li>タイプ</li><li>データ</li><li>FCS</li></ul>MACアドレスとタイプの間に802.1Qヘッダ(VLAN情報)4バイトがはいる。802.1Qヘッダの最後12ビットがVLAN-ID。
+HTTPのパケット構造を書け	<H5>[フレームヘッダ]</h5><ul><li>宛先MAC</li><li>送信元MAC</li><li>タイプ</li></ul><H5>[IPヘッダ] 20バイト</H5><ul></li>送信元IP (4)</li><li>宛先IP (4)</li><li>プロトコル (1)</li><li>他</li></ul><H5>[TCPヘッダ] 20バイト</H5><ul></li>送信元port (2)</li><li>80 (宛先port) (2)</li><li>他</li></ul><H5>FCS</H5>
+OSI基本参照モデル<ul><li>制定者</li><li>内容</li></ul>	[制定者] ISO(国際標準化機構<br>[内容]<table border='1', bordercolor='#000000', cellspacing='0', cellpadding='2'>  <tr><td>第7層</td><td>アプリケーション層</td></tr>  <tr><td>第6層</td><td>プレゼンテーション層</td></tr>  <tr><td>第5層</td><td>セション層</td></tr>  <tr><td>第4層</td><td>トランスポート層</td></tr>  <tr><td>第3層</td><td>ネットワーク層</td></tr>  <tr><td>第2層</td><td>データリンク層</td></tr>  <tr><td>第1層</td><td>物理層</td></tr></table>
+VLANとは。VLANの主な方式は。	仮想的なLANを構成する仕組み。スイッチングHUBが対応。サブネット構成の変更に柔軟に対応できる。<h5>方式</H5><ul><li>ポートベースVLAN: スイッチの物理的なポートごとにVLANグループを設定。</li><li>タグVLAN: 通信パケットにタグIDを埋め込む。IEEE802.1Qで標準化されてる。</li></ul>
+VLANの数の最大値	4094
+VLANの二重タギング(分科会も)	IEEE802.1ad(IEEE802.1QinQ)<br>サービス事業者と利用者のVLANを二重に設定。<br>タグは、サービスタグ(ISPタグ)、カスタマータグ、の順。
+LANケーブルの構造	<ul><li>4対(8芯)：対なのは回路にしないと電流が流れないから。</li><li>RJ45コネクタの1,2,3,6番ピンのみ使用。4,5,7,8は使用しない。</li><li>クロスケーブルを使う(送信⇔受信、受信⇔送信)。ストレートケーブルだと通信できない。</li></ul>
+ケーブルの種類	<ul><li>ツイストペアケーブル<ul><li>STP</li><li>UTP</li></ul></li><li>光ファイバ<ul><li>SMF(伝送距離長い)</li><li>MMF</li></ul></li></ul>
