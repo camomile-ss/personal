@@ -1,2 +1,15 @@
-CentOS 8��Samba 4�Ń��C�Z���X�s�v�̃t�@�C���T�[�o�[���\�z - �����V�X�e�� �G���W�j�A�u���O
+画像で分かる！CentOS 8 のインストール方法 – Hacker's High
+https://hackers-high.com/linux/centos8-installation/
+
+サーバー構築の基本 CentOS Linux 8のインストール後に設定する12の項目 - レムシステム エンジニアブログ
+https://www.rem-system.com/centos8-first-settings/
+
+
+
+
+
+CentOS 8のSamba 4でライセンス不要のファイルサーバーを構築 - レムシステム エンジニアブログ
 https://www.rem-system.com/centos8-samba-install/
+
+Ubuntuで簡単ファイルサーバー（NAS）構築 | パソコン工房 NEXMAG
+https://www.pc-koubou.jp/magazine/10062
