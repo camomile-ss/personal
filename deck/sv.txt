@@ -1,0 +1,2 @@
+CentOS 8のSamba 4でライセンス不要のファイルサーバーを構築 - レムシステム エンジニアブログ
+https://www.rem-system.com/centos8-samba-install/
