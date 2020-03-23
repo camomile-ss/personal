@@ -1,2 +1,4 @@
 WebSocketによって実現できること	クライアントのWebブラウザとサーバ間で双方向の通信をすること	network
 MTUとは	Maximum Transmission Unit<br>一つのフレームで送信できるIPパケットの最大長。イーサネットは1500バイト。	network
+MQTT	Message Queuing Telemetry Transport<br>工場の機械やセンサなどのM2MやIoT機器のメッセージ交換に適したプロトコル。	network
+OAuth	Open Authorization<br>複数のシステム（Webサービス）間でAPIを使って認証を連携させる仕組み。	network
