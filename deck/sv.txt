@@ -8,8 +8,22 @@ https://www.rem-system.com/centos8-first-settings/
 
 
 
+ブロードバンドルータの内と外：ルータの仕組みを学ぼう（3） - ＠IT
+https://www.atmarkit.co.jp/ait/articles/0107/06/news001.html
+2001年07月06日 00時00分
+
+槻ノ木隆の「ネットワーク機器の内側」
+https://bb.watch.impress.co.jp/column/inside/2002/03/07/
+2002/03/07
+
+4ポートギガスイッチ搭載：有線ブロードバンドルータ：BRL-04G：プラネックスコミュニケーションズ
+https://www.planex.co.jp/product/broadlanner/brl04g.shtml
+
+
+
 CentOS 8のSamba 4でライセンス不要のファイルサーバーを構築 - レムシステム エンジニアブログ
 https://www.rem-system.com/centos8-samba-install/
 
 Ubuntuで簡単ファイルサーバー（NAS）構築 | パソコン工房 NEXMAG
 https://www.pc-koubou.jp/magazine/10062
+
