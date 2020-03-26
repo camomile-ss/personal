@@ -21,6 +21,18 @@ https://www.planex.co.jp/product/broadlanner/brl04g.shtml
 
 
 
+
+C.4. 推奨されるパーティション設定スキーム Red Hat Enterprise Linux 8 | Red Hat Customer Portal
+https://access.redhat.com/documentation/ja-jp/red_hat_enterprise_linux/8/html/performing_a_standard_rhel_installation/recommended-partitioning-scheme_partitioning-reference
+
+
+
+LANケーブルのカテゴリ見分け方 | サンワサプライ株式会社
+https://www.sanwa.co.jp/seihin_joho/lan_category/index.html
+
+
+
+
 CentOS 8のSamba 4でライセンス不要のファイルサーバーを構築 - レムシステム エンジニアブログ
 https://www.rem-system.com/centos8-samba-install/
 
