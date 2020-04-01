@@ -1,7 +1,0 @@
-VoIPのデータの種類	<ol><li>呼制御データ<br>呼出->相手が出ると接続、切ると切断、などの処理。プロトコル: H.323、SIP</li><li>音声データ<br>プロトコル: RTP</li></ol>
-RTP	Real time Transport Protocol<br>VoIPの音声データで使われるプロトコル。UDP。<br>UDPではシーケンス管理しないので、順番が変わらないように制御。
-RTPのフレーム構造	IPヘッダ(20byte)、UDPヘッダ(8byte)、RTPヘッダ(12byte)、音声データ<br>RTPヘッダに、シーケンス番号、タイムスタンプなどが含まれる。<br>音声データ（ペイロード）は20byteなど小さいサイズ。
-SIP	Session Initiation Protocol<br>ユーザエージェントと呼ばれる端末間でセッションの生成、変更、切断を行うプロトコル。<br>
-SIPサーバを活用した音声通話の流れ	<ol><li>呼制御<ol><li>発UA->SIPサーバ 通話要求（INVITEメッセージ）</li><li>SIPサーバ DBからIPアドレス検索</li><li>SIPサーバ->着UA 通話要求転送</li><li>着UA 応答を返す</li></ol></li><li>音声通話<br>UA同士がSIPサーバを介さずに直接通信</li></ol>
-SIPサーバの役割	<ol><li>電話情報データベースの管理<br>URI(電話番号・内線番号に相当)とIPアドレスの組合せ情報をDBとして管理。DNSに似た仕組み。</li><li>メッセージの仲介</li></ol>
-[VoIP] UAのアドレスが動的だとIPアドレスは毎回異なる。どうやってSIPサーバでIPアドレスを管理するか。	UAが起動したときにSIPプロトコルを使って自分のURI・IPアドレスをSIPサーバに登録する。レジスト。

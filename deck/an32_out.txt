@@ -1,8 +1,0 @@
-ESPのパケット構造	<ul><li>IPヘッダ</li><li>ESPヘッダ<br>SAを識別するためのSPIやシーケンス番号</li><li>payload<br>暗号化されたデータ</li><li>ESPトレーラ<br>パケット長さ調整用のパディングなど</li><li>ESP認証データ<br>パケットが改ざんされてないか確認するための情報</li></ul>	network
-IPsecの通信とパケットの様子(ESP)	PC -> VPNルータA -(インターネット)-> VPNルータB -> サーバ<br><ul><li>VPNルータA<ul><li>元のパケットの暗号化</li><li>ESPヘッダ付与</li><li>IPヘッダ付与</li></ul></li><li>VPNルータB<ul><li>元のパケットを復号</li><li>ESPヘッダ削除</li><li>改ざん検知</li><li>IPヘッダ削除</li></ul></li></ul>	network
-IPsecの通信モード	<ul><li>トランスポートモード<br>端末間でIPsec通信</li><li>トンネルモード<br>VPN装置(ルータ)間でIPsec通信。こちらが主流。</li></ul>	network
-IKEの実行モード	<ol><li>メインモード<br>IPsec接続先のIPアドレスも認証情報として利用。双方とも固定IPアドレスでないと認証できない。</li><li>Aggressiveモード<br>IPsec接続先のIPアドレスは認証情報として利用しないので動的IPアドレスでも認証できる。</li></ol>	network
-IPsecの通信手順	<ol><li>IKEを使った鍵交換<br>お互いを認証、暗号方式をきめる、鍵を交換。<ul><li>フェーズ1<br>ISAKMP SA を作る</li><li>フェーズ2<br>IPsec SA を作る</li></ul></li><li>ESPプロトコルを使ったIPsecの通信</li></ol>	network
-PPTP	Point to Point Tunneling Protocol<br>PPPのフレームをカプセル化。VPNの構築に使われる。	network
-IPsecやPPTPはなぜNAT機器を通過できないか	IPsecのプロトコルのESPやAHはポート番号を持ってないから。（特にNAPT）	network
-IPsecでNAT越えするための技術	<ol><li>NATトラバーサル<br>ESPパケットをUDPでカプセル化</li><li>VPNパススルー<br>NATルータがIPsecやPPTPの通信を識別して適切な機器にパケットを転送。</li></ol>	network

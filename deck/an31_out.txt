@@ -1,4 +1,0 @@
-なぜVPNというセキュアなネットワークが必要なのか。個別に暗号化通信をすればいいのではないか。	暗号化によって盗聴は防げるが、意図しない相手との通信やデータ破壊の脅威を防げない。	network
-payload	運輸において運行に必要なものを除いた貨物や乗客などの積載量。<br>ミサイル・ロケットの弾頭の爆発力、爆発弾頭	english
-IPsec-VPN の SA	Security Association<br>VPNゲートウェイ間に確立するコネクション	network
-IPsecのプロトコル	<ol><li><ul><li>ESP<br>Encapsulating Security Payload<br>暗号化と認証の両方の機能</li><li>AH<br>Authentication Header<br>認証のみの機能。あまり使われない</li></ul></li><li>IKE<br>Internet Key Exchange<br>鍵交換のプロトコル。IPsecに必須ではないが利用することが多い。</li></ol>	network

@@ -1,2 +1,0 @@
-ICMPの主なタイプ	<ul><li>0: Echo reply</li><li>3: Destination unreachable</li><li>5: Redirect</li><li>8: Echo request</li><li>11: Time exceeded</li></ul>	network
-ICMPのタイプ3(Destination unreachable)の主なコード	<ul><li>0: Network unreachable</li><li>1: Host unreachable</li><li>2: Protocol unreachable</li><li>3: Port unreachable</li><li>4: フラグメンテーション必要 Fragmentation needed and don't fragment was set</li><li>5: ソースルーティング失敗 Source Toute Failed</li><li>9: 送信先ネットワーク拒否 Communication with Destination Network is Administaratively Prohibited</li></ul>	network

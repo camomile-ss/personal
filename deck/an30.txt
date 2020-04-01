@@ -1,1 +1,0 @@
-RFC	Request for comments<br>IETF発行の技術仕様などの文書群。
