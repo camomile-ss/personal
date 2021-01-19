@@ -4,6 +4,8 @@
 ジョルダンから時刻表・運行表情報をもってくる
     1. tt_station2lines
     2. tt_stationline2timetable
+    3-1. tt_get_runtable_zairaisen
+    3-2. tt_get_runtable_shinkansen
     3. tt_get_runtable
     4. tt_timetable2runtable
     5. tt_stationline2runtable
@@ -196,49 +198,31 @@ def tt_stationline2timetable(station, line):
 
     return timetableByDirec, message
 
-def tt_get_runtable(href):
-    ''' 運行表データ取得 '''
+def tt_get_runtable_zairaisen(soup, h2):
+    ''' 運行表データ取得 在来線 '''
 
-    ptn_vehi = re.compile(r'^(.+)：(.+)の運行表$')
-    ptn_shinkansen = re.compile(r'^(.+新幹線)（(.+)）の運行表$')
-    ptn_direc = re.compile(r'：\s*(.+方面)')
+    ptn_h2 = re.compile(r'^(.+)：(.+)の運行表$')
+    ptn_direc = re.compile(r'：\s*(.+方面)$')
     ptn_time = re.compile(r'^(\d{1,2}:\d{1,2})(発|着)$')
 
-    url = 'https://www.jorudan.co.jp' + href
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    r = requests.get(url, headers=headers)
-    #soup = BeautifulSoup(r.content, 'html.parser').find(id='contents_out').find(id='contents').find(id='left')
-    soup = BeautifulSoup(r.content, 'html.parser').find(id='left')
-
     messages = []
-    
-    # 路線名、列車名、方面取り出し
-    heading2 = soup.find('div', {'class': 'heading2'}).find(['h1', 'h2']).text
-    print(heading2)
-    # 在来線
-    mob = ptn_vehi.search(heading2)
+
+    # 路線名、行き先、方面取り出し
+    h2 = h2.text
+    mob = ptn_h2.search(h2)
     if mob:
         line = mob.group(1)
-        vehi = mob.group(2)
+        dest = mob.group(2)
         h_big = soup.find(id='to0').h3.b.string
-        mob = ptn_direc.search(h_big)
-        if mob:
-            direc = mob.group(1)
+        mob_direc = ptn_direc.search(h_big)
+        if mob_direc:
+            direc = mob_direc.group(1)
         else:
             messages.append('warn h_big format : ' + h_big)
             direc = ''
     else:
-        # 新幹線
-        mob = ptn_shinkansen.search(heading2)
-        if mob:
-            line = mob.group(1)
-            vehi = mob.group(2)
-            direc = soup.find(id='to0').h2.b.string
-        else:
-            messages.append('warn header format : ' + heading2)
-            line, vehi, direc = '', '', ''
-
-    print(line, vehi, direc)
+        messages.append('warn heading2 format : ' + h2)
+        line, dest, direc = '', '', ''
 
     # 表データ取り出し
     tbl = soup.find('table', {'class': 'tbl_rosen_eki'})
@@ -263,7 +247,75 @@ def tt_get_runtable(href):
 
         runtable.append([station, time, ad])
 
+    return line, dest, direc, runtable, messages
+
+def tt_get_runtable_shinkansen(soup, h1):
+    ''' 運行表データ取得 新幹線 '''
+
+    ptn_h1 = re.compile(r'^(.+)（.+）の運行表$')
+    ptn_time = re.compile(r'^(\d{1,2}:\d{1,2})(発|着)$')
+
+    messages = []
+
+    # 路線名、行き先、方面取り出し
+    h1 = h1.text
+    mob = ptn_h1.search(h1)
+    if mob:
+        line = mob.group(1)
+        direc = soup.find(id='to0').h2.b.string
+    else:
+        messages.append('warn header format : ' + h1)
+        line, direc = '', ''
+
+    # 表データ取り出し
+    tbl = soup.find('table', {'class': 'tbl_unk_sin'})
+    trs = tbl.find_all('tr')  # 各行
+    runtable = []
+    for tr in trs:
+
+        # 最初の行 -> 列車名取得
+        if tr.get('class') and 's' in tr.get('class'):
+            vehi = tr.find('th', {'class': 'g'}).text
+            vehi = vehi.replace('\n', '')
+            continue
+        # 最後の行 -> 飛ばす
+        if tr.get('class') and 'e' in tr.get('class'):
+            continue
+
+        station = tr.find('td', {'class': 'eki'}).text
+        time_cha = [x for x in tr.find('td', {'class': 'time g'}).strings]  # xx:xx発(or着)
+        # 時刻と発着に分ける
+        for tc in time_cha:
+            tc = tc.replace('\n', '')
+            mob = ptn_time.search(tc)
+            if mob:
+                time = mob.group(1)  # xx:xx （時刻）
+                ad = mob.group(2)  # 発or着
+
+                runtable.append([station, time, ad])
+        
     return line, vehi, direc, runtable, messages
+
+def tt_get_runtable(href):
+    ''' 運行表データ取得 '''
+
+    url = 'https://www.jorudan.co.jp' + href
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    r = requests.get(url, headers=headers)
+    soup = BeautifulSoup(r.content, 'html.parser').find(id='left')
+
+    messages = []
+    
+    heading2 = soup.find('div', {'class': 'heading2'})
+    h1 = heading2.find('h1')
+    h2 = heading2.find('h2')
+    # 在来線、新幹線 分岐
+    if h2:  # 在来線
+        line, dest, direc, runtable, messages = tt_get_runtable_zairaisen(soup, h2)
+    elif h1:  # 新幹線
+        line, dest, direc, runtable, messages = tt_get_runtable_shinkansen(soup, h1)
+
+    return line, dest, direc, runtable, messages
 
 def tt_timetable2runtable(timetable):
     '''
@@ -283,10 +335,10 @@ def tt_timetable2runtable(timetable):
 
         if messages:
             messages_out += [[rt_line, rt_vehi, rt_direc, x] for x in messages]
-        if rt_line != tt_line:
-            messages_out.append([rt_line, rt_vehi, rt_direc, 'line diff. timetable:{0}, runtable: {1}'.format(tt_line, rt_line)])
-        if rt_vehi != tt_vehi:
-            messages_out.append([rt_line, rt_vehi, rt_direc, 'vehi diff. timetable:{0}, runtable: {1}'.format(tt_vehi, rt_vehi)])
+        #if rt_line != tt_line:
+        #    messages_out.append([rt_line, rt_vehi, rt_direc, 'line diff. timetable:{0}, runtable: {1}'.format(tt_line, rt_line)])
+        #if rt_vehi != tt_vehi:
+        #    messages_out.append([rt_line, rt_vehi, rt_direc, 'vehi diff. timetable:{0}, runtable: {1}'.format(tt_vehi, rt_vehi)])
 
         data = [rt_line, rt_vehi, rt_direc, runtable]
         runtables.append(data)
