@@ -2,13 +2,15 @@
 # coding: utf-8
 '''
 ジョルダンから時刻表・運行表情報をもってくる
-    1. tt_station2lines
-    2. tt_stationline2timetable
-    3-1. tt_get_runtable_zairaisen
-    3-2. tt_get_runtable_shinkansen
-    3. tt_get_runtable
-    4. tt_timetable2runtable
-    5. tt_stationline2runtable
+    1. sta2line(station, dw='1')
+    2. staLine2direc(station, line)
+    3. sta2lineDirec(station, dw='1')
+    4. staLineDirec2timetable(station, line, tt_direc)
+    5-1. get_runtable_zairaisen(soup, heading2_h2)
+    5-2. get_runtable_shinkansen(soup, heading2_h1)
+    5. get_runtable(href)
+    6. timetable2runtable(timetable)
+    7. staLineDirec_list2runtable(sta_line_direc_list)
 '''
 import argparse
 import os
@@ -19,16 +21,15 @@ from bs4 import BeautifulSoup
 import re
 from time import ctime
 
-def tt_station2lines(station, dw='1'):
+def sta2line(station, dw='1'):
     '''
     駅名から路線・時刻表一覧の路線リストを取得
     [args]
         dw='1': 平日（'2': 土曜, '3': 日祝）
     [return]
-        lines: (路線の色分け, 路線名) のリスト
+        lines: 路線名 のリスト
         station_rep: ジョルダンで自動に変わった駅名。変わらない時は None
         message: メッセージ。なければ None
-    # 路線の色分け: 
     '''
 
     station_q = urllib.parse.quote(station)
@@ -87,11 +88,7 @@ def tt_station2lines(station, dw='1'):
             # 路線一覧の ul が取得できたら、全 ul から路線名を取得
             lines = []
             for ul in ul_list:
-                color = ul.get('class')
-                if len(color) > 1:
-                    print('{0}: (warn) some ul classes : {1}'.format(station, ', '.join(color)))
-                color = color[0]
-                lines = lines + [(color, x.text) for x in ul.find_all('li')]
+                lines += [x.text for x in ul.find_all('li')]
 
             if len(lines)==0:
                 message = 'err 路線なし (2)'
@@ -103,8 +100,7 @@ def tt_station2lines(station, dw='1'):
         if pan_texts[2] != station:
             message = '駅名変化 -> ' + pan_texts[2]
             station_rep = pan_texts[2]
-        line = pan_texts[-1]
-        lines = [('', line)]  # 色分けはわからない
+        lines = [pan_texts[-1]]  # 唯一の路線
 
     else:
         message = 'err htmlフォーマット違う :: ' + pan.text
@@ -115,16 +111,15 @@ def tt_station2lines(station, dw='1'):
 
     return lines, station_rep, message
 
-def tt_stationline2timetable(station, line):
+def staLine2direc(station, line, dw='1'):
     '''
-    駅, 路線 から時刻表データを取得
+    駅, 路線 から方面リストを取得
+    [args]
+        dw='1': 平日（'2': 土曜, '3': 日祝）
     [return]
-        timetableByDirec: [[方面名, timetable], ...]
-               timetable: [[時刻, tt文字列1, tt文字列2, 運行表ファイル名], ...]
-        message
-    # tt文字列1 e.g.) 飯能行【始発】
-    # tt文字列2 e.g.) 西武池袋線, むさし1号(Laview)
-    # 運行表ファイル名-> /time/cgi/time.cgi?Csg=........
+        tt_direc_list: [tt方面名, ...]
+        tt_table_list: [時刻表soup, ...]
+        message: なければ None
     '''
 
     station_q = urllib.parse.quote(station)
@@ -132,63 +127,103 @@ def tt_stationline2timetable(station, line):
 
     message = None
 
-    url = 'https://www.jorudan.co.jp/time/eki_{0}_{1}.html'.format(station_q, line_q)
+    url = 'https://www.jorudan.co.jp/time/eki_{0}_{1}.html?&Dw={2}'.format(station_q, line_q, dw)
     headers = {'User-Agent': 'Mozilla/5.0'}
     r = requests.get(url, headers=headers)
-    soup = BeautifulSoup(r.content, 'html.parser')
-    left = soup.find('div', {'id': 'left'})
-
-    # 方面名を取得（複数）
-    h_big_list = left.find_all('div', {'class': 'h_big'}, recursive=False)
-    tt_direc_list = []
-    for h_big in h_big_list:
-        h = h_big.find('h2').find('b').text
-        _, tt_direc = h.split('\n')
-        tt_direc_list.append(tt_direc)
-
-    # 時刻表全体を取得
-    tables = left.find_all('table', {'class': 'timetable2'})
-
-    # 結果がない
-    if len(tables) == 0:
-        message = 'err 時刻表ない'
-        timetableByDirec = None 
-
-    elif len(tables) != len(tt_direc_list):
-        message = 'err 方面, 時刻表 数が相違'
-        timetableByDirec = None
-
+    try:
+        soup = BeautifulSoup(r.content, 'html.parser')
+        left = soup.find('div', {'id': 'left'})
+    except:
+        message = 'err 時刻表なし : {0} {1}'.format(station, line)
+        tt_direc_list = None
     else:
+        # 方面名を取得（複数）
+        h_big_list = left.find_all('div', {'class': 'h_big'}, recursive=False)
+        tt_direc_list = []
+        for h_big in h_big_list:
+            h = h_big.find('h2').find('b').text
+            _, tt_direc = h.split('\n')
+            tt_direc_list.append(tt_direc)
+
+        # 時刻表全体を取得
+        tt_table_list = left.find_all('table', {'class': 'timetable2'})
+
+        if len(tt_table_list) == 0:
+            message = 'err 時刻表なし : {0} {1}'.format(station, line)
+        elif len(tt_table_list) != len(tt_direc_list):
+            message = 'err 方面, 時刻表 数が相違 : {0} {1}'.format(station, line)
+
+    return tt_direc_list, tt_table_list, message
+
+def sta2lineDirec(station, dw='1'):
+    '''
+    駅から、路線・方面リスト取得
+    [args]
+        dw='1': 平日（'2': 土曜, '3': 日祝）
+    [return]
+        lines_direcs: [(路線名, [方面, ...], 路線単位のメッセージ), ...]
+        station_rep: ジョルダンで自動に変わった駅名。変わらない時は None
+        message1: 駅単位のメッセージ
+    # 路線の色分け: 
+    '''
+    lines, station_rep, message1 = sta2line(station, dw=dw)
+    lines_direcs = []
+    for line in lines:
+        tt_direc_list, _, message2 = staLine2direc(station, line)
+        lines_direcs.append((line, tt_direc_list, message2))
+
+    return lines_direcs, station_rep, message1
+
+def staLineDirec2timetable(station, line, tt_direc, dw='1'):
+    '''
+    駅, 路線, 方面 から時刻表データを取得
+    [return]
+        timetable: [[時刻, tt文字列1, tt文字列2, 運行表ファイル名], ...]
+        message1: 駅・路線単位のメッセージ
+        message2: 駅・路線・方面単位のメッセージ
+    # tt文字列1 e.g.) 飯能行【始発】
+    # tt文字列2 e.g.) 西武池袋線, むさし1号(Laview)
+    # 運行表ファイル名-> /time/cgi/time.cgi?Csg=........
+    '''
+
+    # 方面リスト, 時刻表soupリストを取得
+    tt_direc_list, tt_table_list, message1 = staLine2direc(station, line, dw=dw)
+
+    # 方面がない
+    message2 = None
+    if not tt_direc in tt_direc_list: 
+        #message2 = 'err 方面なし : {0} {1} {2}'.format(station, line, tt_direc)
+        message2 = 'err 方面なし'
+        timetable = None
+    else:
+        table = tt_table_list[tt_direc_list.index(tt_direc)]
         # 時刻表の1行ごと
-        timetableByDirec = []
-        for tt_direc, table in zip(tt_direc_list, tables):
-            trs = table.find_all('tr', recursive=False)
-            timetable = []
-            hr = None  # 時
-            for tr in trs:
+        trs = table.find_all('tr', recursive=False)
+        timetable = []
+        hr = None  # 時
+        for tr in trs:
 
-                # "時"の最初なら時を取得
-                if tr.find('th', recursive=False):
-                    hr = tr.find('th', recursive=False).text  # 時
+            # "時"の最初なら時を取得
+            if tr.find('th', recursive=False):
+                hr = tr.find('th', recursive=False).text  # 時
 
-                # 各列車データ取得
-                vehicles = tr.find('td', recursive=False).find_all('div', recursive=False)
-                for v in vehicles:
-                    a = v.find('a', recursive=False)
-                    mn = a.b.text  # 分
-                    tt_time = '{0:02}:{1:02}'.format(int(hr), int(mn))  # 時刻
-                    href = a.get('href')  # 運行表href
+            # 各列車データ取得
+            vehicles = tr.find('td', recursive=False).find_all('div', recursive=False)
+            for v in vehicles:
+                a = v.find('a', recursive=False)
+                mn = a.b.text  # 分
+                tt_time = '{0:02}:{1:02}'.format(int(hr), int(mn))  # 時刻
+                href = a.get('href')  # 運行表href
 
-                    vs = [s for s in a.find('span', recursive=False).strings]
-                    tt_cha1 = vs[0]  # 行先など
-                    tt_cha2 = vs[1] if len(vs) > 1 else ''  # 列車名、路線名など
+                vs = [s for s in a.find('span', recursive=False).strings]
+                tt_cha1 = vs[0]  # 行先など
+                tt_cha2 = vs[1] if len(vs) > 1 else ''  # 列車名、路線名など
 
-                    timetable.append([tt_time, tt_cha1, tt_cha2, href])
-            timetableByDirec.append([tt_direc, timetable])
+                timetable.append([tt_time, tt_cha1, tt_cha2, href])
 
-    return timetableByDirec, message
+    return timetable, message1, message2
 
-def tt_get_runtable_zairaisen(soup, heading2_h2):
+def get_runtable_zairaisen(soup, heading2_h2):
     ''' 運行表データ取得 在来線 '''
 
     ptn_heading2_h2 = re.compile(r'^(.+)：(.+)の運行表$')
@@ -240,7 +275,7 @@ def tt_get_runtable_zairaisen(soup, heading2_h2):
 
     return rt_line, rt_dest, rt_direc, runtable, messages
 
-def tt_get_runtable_shinkansen(soup, heading2_h1):
+def get_runtable_shinkansen(soup, heading2_h1):
     ''' 運行表データ取得 新幹線 '''
 
     ptn_heading2_h1 = re.compile(r'^(.+)（(.+)）の運行表$')
@@ -296,7 +331,7 @@ def tt_get_runtable_shinkansen(soup, heading2_h1):
         
     return rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages
 
-def tt_get_runtable(href):
+def get_runtable(href):
     '''
     運行表データ取得
     [return]
@@ -316,15 +351,15 @@ def tt_get_runtable(href):
     # 在来線、新幹線 分岐
     if heading2_h2:  # 在来線
         rt_line, rt_dest, rt_direc, runtable, messages \
-            = tt_get_runtable_zairaisen(soup, heading2_h2)
+            = get_runtable_zairaisen(soup, heading2_h2)
         vehicle_no = None
     elif heading2_h1:  # 新幹線
         rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages \
-            = tt_get_runtable_shinkansen(soup, heading2_h1)
+            = get_runtable_shinkansen(soup, heading2_h1)
 
     return rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages
 
-def tt_timetable2runtable(timetable):
+def timetable2runtable(timetable):
     '''
     timetable データから、運行表リストを取得
     [args]
@@ -342,21 +377,23 @@ def tt_timetable2runtable(timetable):
     runtableByVehicle = []
     for vehi in timetable:
         tt_time, tt_cha1, tt_cha2, rt_href = vehi
-        rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages = tt_get_runtable(rt_href)
+        rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages = get_runtable(rt_href)
 
         if messages:
-            messages_out += [', '.join([tt_time, rt_line, rt_dest, rt_direc, vehicle_no, x]) for x in messages]
+            messages_out += [', '.join([tt_time, rt_line, rt_dest, rt_direc, vehicle_no, x]) \
+                             for x in messages]
 
         data = [tt_time, tt_cha1, tt_cha2, rt_line, rt_dest, rt_direc, vehicle_no, runtable]
         runtableByVehicle.append(data)
 
     return runtableByVehicle, messages_out
 
-def tt_stationline2runtable(stationline_list):
+def staLineDirec_list2runtable(sta_line_direc_list, dw='1'):
     '''
-    駅、路線のリストから、運行表を取得して重複を削除して返す
+    駅, 路線, 方面 のリストから、運行表を取得して重複を削除して返す
     [args]
-        stationline_list: [(駅, 路線), (駅, 路線), ...]
+        sta_line_direc_list: [(駅, [(路線, [tt方面, tt方面, ...]), ...]), 
+                              (駅, [(路線, [tt方面, tt方面, ...]), ...]), ...]
     [return]
         runtableByVehicle_out:
             [[入力駅, 入力路線, tt方面, tt時刻, tt文字列1, tt文字列2, rt路線, rt行き先, rt方面, 列車no, runtable], ...]
@@ -364,48 +401,49 @@ def tt_stationline2runtable(stationline_list):
         messages_out
     '''
     # 定数（runtableByVehicle のカラム位置）
-    _, _, _, _, _, _, i_rt_line, i_rt_dest, i_rt_direc, i_vehicle_no, i_runtable = range(11)
+    _, _, _, _, _, _, _, i_rt_dest, _, i_vehicle_no, i_runtable = range(11)
 
     runtableByVehicle_out, messages_out = [], []
-    for s, l in stationline_list:
-        print('{0} {1}: {2}'.format(s, l, ctime()))  # 経過print
-        # 駅・路線から時刻表取得
-        timetableByDirec, message_1 = tt_stationline2timetable(s, l)
-        if message_1:
-            messages_out.append(', '.join([s, l, message_1]))
-        # 方面ごとに
-        for tt_bd in timetableByDirec:
-            tt_direc, timetable = tt_bd
-            print('{0}: {1}'.format(tt_direc, ctime()))  # 経過print
-            # 各列車の運行表取得
-            runtableByVehicle, messages_2 = tt_timetable2runtable(timetable)                
-            if messages_2:
-                messages_out += [', '.join([s, l, x]) for x in messages_2]
+    for station, line_direc_list in sta_line_direc_list:
+        print('[{0}] {1}'.format(station, ctime()))  # 経過print
+        for line, direc_list in line_direc_list:
+            print(line, ctime())  # 経過print
+            for tt_direc in direc_list:
+                print(tt_direc, ctime())
+                timetable, message1, message2 = staLineDirec2timetable(station, line, tt_direc, dw=dw)
+                if message1:
+                    #messages1 = []
+                    messages_out.append('{0} {1} : {2}'.format(station, line, message1))
+                if message2:
+                    messages_out.append('{0} {1} {2} : {3}'.format(station, line, tt_direc, message2))
+                runtableByVehicle, messages = timetable2runtable(timetable)
+                if messages:
+                    messages_out += ['{0} {1} {2}: {3}'.format(station, line, tt_direc, x) for x in messages]
 
-            # 運行表ひとつずつ既存か判断、既存でなければ追加
-            for rt_1vehi in runtableByVehicle:
-                _, _, _, rt_line, rt_dest, rt_direc, vehicle_no, runtable = rt_1vehi
+                # 運行表ひとつずつ既存か判断、既存でなければ追加
+                for rt_1vehi in runtableByVehicle:
+                    _, _, _, _, rt_dest, _, vehicle_no, runtable = rt_1vehi
 
-                # 新幹線などの場合(列車noがある)
-                if vehicle_no:
-                    # 同じ列車noで運行表が長い方を生かす。短いほうは捨てる
-                    vehicle_no_list = [x[i_vehicle_no] for x in runtableByVehicle_out]
-                    if vehicle_no in vehicle_no_list:
-                        runtable_old = runtableByVehicle_out[vehicle_no_list.index(vehicle_no)][i_runtable]
-                        if len(runtable) > len(runtable_old):
-                            runtableByVehicle_out.pop(vehicle_no_list.index(vehicle_no))
-                            runtableByVehicle_out.append([s, l, tt_direc] + rt_1vehi)
-                    # 新しい列車noは追加
+                    # 新幹線などの場合(列車noがある)
+                    if vehicle_no:
+                        # 同じ列車noで運行表が長い方を生かす。短いほうは捨てる
+                        vehicle_no_list = [x[i_vehicle_no] for x in runtableByVehicle_out]
+                        if vehicle_no in vehicle_no_list:
+                            runtable_old = runtableByVehicle_out[vehicle_no_list.index(vehicle_no)][i_runtable]
+                            if len(runtable) > len(runtable_old):
+                                runtableByVehicle_out.pop(vehicle_no_list.index(vehicle_no))
+                                runtableByVehicle_out.append([station, line, tt_direc] + rt_1vehi)
+                        # 新しい列車noは追加
+                        else:
+                            runtableByVehicle_out.append([station, line, tt_direc] + rt_1vehi)
+
+                    # 在来線などの場合(列車noがない)
                     else:
-                        runtableByVehicle_out.append([s, l, tt_direc] + rt_1vehi)
-
-                # 在来線などの場合(列車noがない)
-                else:
-                    # rt_dest, runtable で同一列車を判断
-                    zairai_comp = [x[i_rt_dest], x[i_runtable]] for x in runtableByVehicle_out]
-                    if [rt_dest, runtable] in zairai_comp:
-                        continue
-                    runtableByVehicle_out.append([s, l, tt_direc] + rt_1vehi)
+                        # rt_dest, runtable で同一列車を判断
+                        zairai_comp = [[x[i_rt_dest], x[i_runtable]] for x in runtableByVehicle_out]
+                        if [rt_dest, runtable] in zairai_comp:
+                            continue
+                        runtableByVehicle_out.append([station, line, tt_direc] + rt_1vehi)
 
     return runtableByVehicle_out, messages_out
 
@@ -413,7 +451,7 @@ if __name__ == '__main__':
 
     #psr = argparse.ArgumentParser()
     station = '金浜'
-    lines, station_rep, message = tt_station2lines(station)
+    lines, station_rep, message = sta2line(station)
     print(lines)
     print(station_rep)
     print(message)
@@ -421,9 +459,9 @@ if __name__ == '__main__':
     '''
     #station, line = '仙台', '仙石線'
     station, line = '東京', '東海道・山陽新幹線'
-    data, message = tt_stationline2timetable(station, line)
+    data, message = staLine2timetable(station, line)
     tt1 = data[0][1]
-    runtables, messages = tt_timetable2runtable(tt1)
+    runtables, messages = timetable2runtable(tt1)
     print(runtables)
     print(messages)
     '''
@@ -431,7 +469,7 @@ if __name__ == '__main__':
     hrefs = ['/time/cgi/time.cgi?Csg=0&Sok=1&pg=22&rf=tm&lnm=%E4%BB%99%E7%9F%B3%E7%B7%9A%28%E7%9F%B3%E5%B7%BB%E8%A1%8C%29&rnm=%E4%BB%99%E7%9F%B3%E7%B7%9A&lid=7995537&eki0=%E3%81%82%E3%81%8A%E3%81%B0%E9%80%9A&eki1=%E4%BB%99%E5%8F%B0&eki2=%E7%9F%B3%E5%B7%BB&dir=D%E7%9F%B3%E5%B7%BB%E6%96%B9%E9%9D%A2&Dym=202101&Ddd=15&Dhh=5&Dmn=1&Dw=0&jmp=1']
  
     for h in hrefs:
-        line, vehi, direc, data, messages = tt_get_runtable(h)
+        line, vehi, direc, data, messages = get_runtable(h)
         print(line)
         print(vehi)
         print(direc)
@@ -442,7 +480,7 @@ if __name__ == '__main__':
     list = [('仙台', '仙石線'), ('仙台', '仙山線')]
     for s, l in list:
 
-        data, message = tt_stationline2timetable(s, l)
+        data, message = staLine2timetable(s, l)
         print(data)
         print(message)
         print('')
@@ -452,7 +490,7 @@ if __name__ == '__main__':
 
     for station in stations:
         print(station)
-        lines, station_rep, message = tt_station2lines(station)
+        lines, station_rep, message = sta2line(station)
         print(lines)
         print(station_rep)
         print(message)
