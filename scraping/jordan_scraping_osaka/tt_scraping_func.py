@@ -130,28 +130,33 @@ def staLine2direc(station, line, dw='1'):
     url = 'https://www.jorudan.co.jp/time/eki_{0}_{1}.html?&Dw={2}'.format(station_q, line_q, dw)
     headers = {'User-Agent': 'Mozilla/5.0'}
     r = requests.get(url, headers=headers)
+    tt_direc_list, tt_table_list = [], []
     try:
         soup = BeautifulSoup(r.content, 'html.parser')
         left = soup.find('div', {'id': 'left'})
     except:
-        message = 'err 時刻表なし : {0} {1}'.format(station, line)
-        tt_direc_list = None
+        message = 'err 時刻表なし (soup or left なし) : {0} {1}'.format(station, line)
     else:
-        # 方面名を取得（複数）
-        h_big_list = left.find_all('div', {'class': 'h_big'}, recursive=False)
-        tt_direc_list = []
-        for h_big in h_big_list:
-            h = h_big.find('h2').find('b').text
-            _, tt_direc = h.split('\n')
-            tt_direc_list.append(tt_direc)
 
-        # 時刻表全体を取得
-        tt_table_list = left.find_all('table', {'class': 'timetable2'})
+        try:
+            # 方面名を取得（複数）
+            h_big_list = left.find_all('div', {'class': 'h_big'}, recursive=False)
+            tt_direc_list = []
+            for h_big in h_big_list:
+                h = h_big.find('h2').find('b').text
+                _, tt_direc = h.split('\n')
+                tt_direc_list.append(tt_direc)
 
-        if len(tt_table_list) == 0:
-            message = 'err 時刻表なし : {0} {1}'.format(station, line)
-        elif len(tt_table_list) != len(tt_direc_list):
-            message = 'err 方面, 時刻表 数が相違 : {0} {1}'.format(station, line)
+            # 時刻表全体を取得
+            tt_table_list = left.find_all('table', {'class': 'timetable2'})
+
+        except:
+            message = 'err 時刻表なし (h_big or h_big.text) : {0} {1}'.format(station, line)
+        else:
+            if len(tt_table_list) == 0:
+                message = 'err 時刻表なし (len=0) : {0} {1}'.format(station, line)
+            elif len(tt_table_list) != len(tt_direc_list):
+                message = 'err 方面, 時刻表 数が相違 : {0} {1}'.format(station, line)
 
     return tt_direc_list, tt_table_list, message
 
@@ -345,17 +350,22 @@ def get_runtable(href):
 
     messages = []
     
-    heading2 = soup.find('div', {'class': 'heading2'})
-    heading2_h1 = heading2.find('h1')  # 新幹線などはh1がある
-    heading2_h2 = heading2.find('h2')  # 在来線はh2がある
-    # 在来線、新幹線 分岐
-    if heading2_h2:  # 在来線
-        rt_line, rt_dest, rt_direc, runtable, messages \
-            = get_runtable_zairaisen(soup, heading2_h2)
-        vehicle_no = None
-    elif heading2_h1:  # 新幹線
-        rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages \
-            = get_runtable_shinkansen(soup, heading2_h1)
+    try:
+        heading2 = soup.find('div', {'class': 'heading2'})
+        heading2_h1 = heading2.find('h1')  # 新幹線などはh1がある
+        heading2_h2 = heading2.find('h2')  # 在来線はh2がある
+    except:
+        messages = ['get runtable err']
+        return None, None, None, None, [], messages
+    else:
+        # 在来線、新幹線 分岐
+        if heading2_h2:  # 在来線
+            rt_line, rt_dest, rt_direc, runtable, messages \
+                = get_runtable_zairaisen(soup, heading2_h2)
+            vehicle_no = None
+        elif heading2_h1:  # 新幹線
+            rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages \
+                = get_runtable_shinkansen(soup, heading2_h1)
 
     return rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages
 
@@ -375,6 +385,11 @@ def timetable2runtable(timetable):
     messages_out = []
 
     runtableByVehicle = []
+
+    if not timetable:
+        messages_out = ['err timetable=None']
+        return [], messages_out
+
     for vehi in timetable:
         tt_time, tt_cha1, tt_cha2, rt_href = vehi
         rt_line, rt_dest, rt_direc, vehicle_no, runtable, messages = get_runtable(rt_href)
@@ -401,7 +416,7 @@ def staLineDirec_list2runtable(sta_line_direc_list, dw='1'):
         messages_out
     '''
     # 定数（runtableByVehicle のカラム位置）
-    _, _, _, _, _, _, _, i_rt_dest, _, i_vehicle_no, i_runtable = range(11)
+    i_input_station, _, _, _, _, _, _, i_rt_dest, _, i_vehicle_no, i_runtable = range(11)
 
     runtableByVehicle_out, messages_out = [], []
     for station, line_direc_list in sta_line_direc_list:
@@ -442,57 +457,15 @@ def staLineDirec_list2runtable(sta_line_direc_list, dw='1'):
                         # rt_dest, runtable で同一列車を判断
                         zairai_comp = [[x[i_rt_dest], x[i_runtable]] for x in runtableByVehicle_out]
                         if [rt_dest, runtable] in zairai_comp:
-                            continue
-                        runtableByVehicle_out.append([station, line, tt_direc] + rt_1vehi)
+                            # 入力駅が早い方を生かす。
+                            # (遅い方には快速などの情報が無い場合がある)
+                            idx = zairai_comp.index([rt_dest, runtable])
+                            station_old = runtableByVehicle_out[idx][i_input_station]
+                            rt_stations = [x[0] for x in runtableByVehicle_out[idx][i_runtable]]
+                            if rt_stations.index(station) < rt_stations.index(station_old):
+                                runtableByVehicle_out[idx] = [station, line, tt_direc] + rt_1vehi
+                        else:
+                            runtableByVehicle_out.append([station, line, tt_direc] + rt_1vehi)
 
     return runtableByVehicle_out, messages_out
 
-if __name__ == '__main__':
-
-    #psr = argparse.ArgumentParser()
-    station = '金浜'
-    lines, station_rep, message = sta2line(station)
-    print(lines)
-    print(station_rep)
-    print(message)
-
-    '''
-    #station, line = '仙台', '仙石線'
-    station, line = '東京', '東海道・山陽新幹線'
-    data, message = staLine2timetable(station, line)
-    tt1 = data[0][1]
-    runtables, messages = timetable2runtable(tt1)
-    print(runtables)
-    print(messages)
-    '''
-    '''
-    hrefs = ['/time/cgi/time.cgi?Csg=0&Sok=1&pg=22&rf=tm&lnm=%E4%BB%99%E7%9F%B3%E7%B7%9A%28%E7%9F%B3%E5%B7%BB%E8%A1%8C%29&rnm=%E4%BB%99%E7%9F%B3%E7%B7%9A&lid=7995537&eki0=%E3%81%82%E3%81%8A%E3%81%B0%E9%80%9A&eki1=%E4%BB%99%E5%8F%B0&eki2=%E7%9F%B3%E5%B7%BB&dir=D%E7%9F%B3%E5%B7%BB%E6%96%B9%E9%9D%A2&Dym=202101&Ddd=15&Dhh=5&Dmn=1&Dw=0&jmp=1']
- 
-    for h in hrefs:
-        line, vehi, direc, data, messages = get_runtable(h)
-        print(line)
-        print(vehi)
-        print(direc)
-        print(data)
-        print(messages)
-    '''
-    '''
-    list = [('仙台', '仙石線'), ('仙台', '仙山線')]
-    for s, l in list:
-
-        data, message = staLine2timetable(s, l)
-        print(data)
-        print(message)
-        print('')
-    '''
-    '''
-    stations = ['仙台', '該当無し', '福島', '庭坂', '大曲', '津軽湯の沢']
-
-    for station in stations:
-        print(station)
-        lines, station_rep, message = sta2line(station)
-        print(lines)
-        print(station_rep)
-        print(message)
-        print('')
-    '''

@@ -5,6 +5,7 @@ import argparse
 import os
 import re
 import sys
+import pickle
 from time import ctime
 from rt_class import Vehicle, Lines, Line, Line_higher
 
@@ -36,16 +37,18 @@ def mk_station_conv(fn):
         data = [[x.strip() for x in l.split('\t')] for l in f]
     return {x[2]: x[3] for x in data}
 
-def mk_rail_station_dic(fn):
+def mk_railstation_data(fn, station_conv):
     with open(fn, 'r', encoding='utf-8') as f:
         indata = [[x.strip() for x in l.split('\t')] for l in f]
     data = {}
     for l in indata:
-        lineID, linename, _, _, order, stationID, stationCD, stationname, *_ = l
-        if (lineID, linename) in data:
-            data[(lineID, linename)].append((order, stationID, stationCD, stationname))
+        lineID, linename, _, _, _, _, _, stationname, *_ = l
+        k = (lineID, linename)
+        stationname = station_conv[stationname]
+        if k in data:
+            data[k].append(stationname)
         else:
-            data[(lineID, linename)] = [(order, stationID, stationCD, stationname)]
+            data[k] = [stationname]
     return data
 
 if __name__ == '__main__':
@@ -75,11 +78,9 @@ if __name__ == '__main__':
     # {cve駅名: ジョルダン駅名}
     station_conv = mk_station_conv(stalinedirec_fn)
 
-    # 路線 - 駅名リスト 辞書
-    # {(cve路線ID, cve路線名): [(order, cve駅ID, cve駅CD, cve駅名), ...], ...}
-    rail_station_dic = mk_rail_station_dic(railstation_fn)
-    # {(cve路線ID, cve路線名): [ジョルダン駅名, ...], ...}
-    rail_j_station_dic = {k: [station_conv[l[3]] for l in v] for k, v in rail_station_dic.items()}
+    # railstation -> 路線 - 駅名リスト
+    # {(cve路線ID, cve路線名): ジョルダン駅名, ...}
+    railstation_data = mk_railstation_data(railstation_fn, station_conv)
 
     ptn = re.compile(r'^Line(\d+)$')
     def revID(id):
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 
     # Lines instance
     lines = Lines()
-    for k, v in rail_j_station_dic.items():
+    for k, v in railstation_data.items():
         lineID, linename = k
         ptn_no = lines.add_line(lineID)
         if ptn_no < 0:
@@ -105,11 +106,13 @@ if __name__ == '__main__':
             lines.set_line_stations(lineID, linename, v)
             lines.lines[lineID].reverse_lineID = revID(lineID)
         else:
-            lines.set_line_stations_higher(lineID, v)
+            lines.set_line_stations(lineID, linename, v)
 
     # runtable 順次処理
     ptn = re.compile(r'^(.+)_(.+)_runtables.txt$')
     runtable_fn_list = [x for x in os.listdir(rt_dirn) if ptn.search(x)]
+
+    vehicles = {}
 
     with open(okfn, 'w', encoding='utf-8') as okf, \
          open(osngfn, 'w', encoding='utf-8') as osngf, \
@@ -162,20 +165,20 @@ if __name__ == '__main__':
                             flg = -1
                             break
 
-                        line_stations = rail_j_station_dic[lsl]
+                        line_stations = lines.lines[cve_lineID].stations
 
                         flg = vehicle.chk(line_stations)
                         
                         # OK
                         if flg == 0:  # or flg == 1:
-                            lines.lines[cve_lineID].vehicle_cnt_up()
+                            lines.lines[cve_lineID].vehicle_cnt += 1
                             outdata += [str(flg), cve_lineID, cve_linename]
                             okf.write('\t'.join(outdata) + '\n')
                             written = True
                             break
                         # 外側にng駅
                         if flg == 7:
-                            lines.lines[cve_lineID].vehicle_cnt_up()
+                            lines.lines[cve_lineID].vehicle_cnt += 1
                             outdata += [str(flg), cve_lineID, cve_linename, vehicle.middle_start or '', vehicle.middle_end or '']
                             outdata += ['-> match'] + vehicle.match_stations
                             outdata += ['-> outside ng'] + vehicle.outside_ng_stations
@@ -194,7 +197,7 @@ if __name__ == '__main__':
                             pasf.write('\t'.join(outdata) + '\n')
                             written = True
                             break
-                    
+                                        
                     # 飛ばすファイル
                     if flg < 0:
                         continue
@@ -208,8 +211,27 @@ if __name__ == '__main__':
                             outdata += ['-> outside ng'] + vehicle.outside_ng_stations
                         errf.write('\t'.join(outdata) + '\n')
 
+                    # vehicles ストア
+                    if j_linename in vehicles:
+                        if j_direc in vehicles[j_linename]:
+                            vehicles[j_linename][j_direc][i] = vehicle
+                        else:
+                            vehicles[j_linename][j_direc] = {i: vehicle}
+                    else:
+                        vehicles[j_linename] = {j_direc: {i: vehicle}}
+    
     # 路線リスト
     line_list_data = lines.line_list()
 
     with open(llfn, 'w', encoding='utf-8') as llf:
         llf.write(''.join(['\t'.join([str(x) for x in l]) + '\n' for l in line_list_data]))
+
+    # pickle
+    pickledirn = os.path.join(wkdirn, 'pickle')
+    if not os.path.isdir(pickledirn):
+        os.mkdir(pickledirn)
+    vpfn = os.path.join(pickledirn, 'vehicles.pickle')
+    pickle.dump(vehicles, open(vpfn, 'wb'))
+    lpfn = os.path.join(pickledirn, 'lines.pickle')
+    pickle.dump(lines, open(lpfn, 'wb'))
+

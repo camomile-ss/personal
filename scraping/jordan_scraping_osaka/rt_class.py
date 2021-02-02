@@ -141,11 +141,11 @@ class Lines:
                 return int(ID_s)
 
     def set_line_stations(self, lineID, name, stations):
-        self.lines[lineID].set_line_stations(name, stations)
-
-    def set_line_stations_higher(self, lineID, stations):
-        parentStations = self.lines[self.lines[lineID].parentlineID].stations
-        self.lines[lineID].set_line_stations(parentStations, stations)
+        if self.lines[lineID].__class__ == Line:
+            self.lines[lineID].set_line_stations(name, stations)
+        elif self.lines[lineID].__class__ == Line_higher:
+            parentStations = self.lines[self.lines[lineID].parentlineID].stations
+            self.lines[lineID].set_line_stations(name, stations, parentStations)
 
     def add_higher(self, parentlineID, match_stations, pass_stations):
         parentline = self.lines[parentlineID]
@@ -158,7 +158,7 @@ class Lines:
                 and all(not m in l.pass_stations for m in match_stations) \
                 and all(not p in l.stop_stations for p in pass_stations):
                 # 既存
-                l.vehicle_cnt_up()
+                l.vehicle_cnt += 1
                 # 駅追加
                 l.stop_stations = sorted(set(l.stop_stations + match_stations), \
                                          key=lambda x: l.stations.index(x))
@@ -178,7 +178,7 @@ class Lines:
         new_line.stations = [x for x in parentline.stations]
         new_line.stop_stations = [x for x in match_stations]
         new_line.pass_stations = [x for x in pass_stations]
-        new_line.vehicle_cnt = 1
+        new_line.vehicle_cnt += 1
         new_lineID = '{0}_{1}'.format(parentlineID, new_line.ptn_no)
         # 逆路線既存か
         parent_rev_lineID = parentline.reverse_lineID
@@ -192,7 +192,7 @@ class Lines:
                 l.stop_stations = sorted(set(l.stop_stations + new_line.stop_stations), \
                                          key=lambda x: l.stations.index(x))
                 l.pass_stations = sorted(set(l.pass_stations + new_line.pass_stations), \
-                                         key=lambda x: l.stations.index(x))
+                                         key=lambda x: self.lines[id].stations.index(x))
                 new_line.reverse_lineID = id
                 l.reverse_lineID = new_lineID
                 break
@@ -202,12 +202,12 @@ class Lines:
     def line_list(self):
         
         data = []
-        data.append(['lineID', 'linename', 'reverseID', '->stations'])
+        data.append(['lineID', 'linename', 'vehicle_cnt', 'reverseID', '->stations'])
         for id, v in sorted(self.lines.items(), key=lambda x: x[0]):
             if v.__class__ == Line:
-                linedata = [id, v.name, v.reverse_lineID] + v.stations
+                linedata = [id, v.name, v.vehicle_cnt, v.reverse_lineID] + v.stations
             elif v.__class__ == Line_higher:
-                linedata = [id, v.name or '', v.reverse_lineID or '']
+                linedata = [id, v.name or '', v.vehicle_cnt, v.reverse_lineID or '']
                 for st in v.stations:
                     if st in v.stop_stations:
                         linedata.append(st)
@@ -224,6 +224,7 @@ class Line:
         self.name = None
         self.stations = None
         self.vehicle_cnt = 0
+        self.ptn_no = 0
         self.ptn_cnt = 0
         self.reverse_lineID = None
 
@@ -231,8 +232,8 @@ class Line:
         self.name = name
         self.stations = [x for x in stations]
 
-    def vehicle_cnt_up(self):
-        self.vehicle_cnt += 1
+#    def vehicle_cnt_up(self):
+#        self.vehicle_cnt += 1
 
 class Line_higher(Line):
     def __init__(self, parentlineID, ptn_no):
@@ -242,8 +243,8 @@ class Line_higher(Line):
         self.stop_stations = None
         self.pass_stations = None
 
-    def set_line_stations(self, parentStations, stations):
+    def set_line_stations(self, name, stations, parentStations):
+        self.name = name
         self.stations = [x for x in parentStations]
         self.stop_stations = [x for x in stations]
         self.pass_stations = [x for x in parentStations if not x in stations]
-
