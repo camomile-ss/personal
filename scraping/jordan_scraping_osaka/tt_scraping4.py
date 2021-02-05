@@ -74,9 +74,7 @@ def read_data_and_sort(rt_dirn):
         all_data += [[tt_line, tt_direc, str(i)] + x for i, x in enumerate(data)]
 
     # データ長い順にsort
-    print('sort start', ctime())
     all_data.sort(key=lambda x: len(x), reverse=True)
-    print('sort end', ctime())
 
     return all_data
 
@@ -117,7 +115,10 @@ if __name__ == '__main__':
     # Lines instance
     lines = Lines()
     for (lineID, linename), stations in railstation_data.items():
-        lines.add_line(lineID, linename, stations)
+        chk = lines.add_line(lineID, linename, stations)
+        if chk < 0:
+            print('railstation err: {0}: {1} {2}'.format(chk, lineID, linename))
+            sys.exit()
 
     # 運行表データを全部読み、長いデータ順に
     all_data = read_data_and_sort(rt_dirn)
@@ -178,7 +179,10 @@ if __name__ == '__main__':
                 break
             # 通過駅あり
             if flg == 8:
-                new_lineID = lines.add_new_higher(cve_lineID, vehicle.match_stations, vehicle.pass_stations)
+                new_lineID = lines.search_rapid_or_add(cve_lineID, vehicle.match_stations, vehicle.pass_stations)
+                if type(new_lineID) is int:
+                    print('err {0} : {1} {2} {3}'.format(new_lineID, tt_line, tt_direc, i))
+                    sys.exit()
                 vehicle.set_lineID(new_lineID)
                 lines.lines[new_lineID].vehicle_cnt += 1
                 outdata += [str(flg), cve_lineID, cve_linename, new_lineID]
