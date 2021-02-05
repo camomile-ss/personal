@@ -1,13 +1,17 @@
 #!/usr/bin/python
 # coding: utf-8
-
+'''
+取得した運行表から路線を整理、優等列車路線のリストを作成
+'''
 import argparse
 import os
 import re
 import sys
 import pickle
 from time import ctime
-from rt_class import Vehicle, Lines, Line, Line_higher
+#from rt_class import Vehicle, Lines, Line, Line_higher
+from vehicle import Vehicle
+from lines import Lines
 
 def mk_line_conv(fn):
     '''
@@ -19,11 +23,11 @@ def mk_line_conv(fn):
         indata = [[x.strip() for x in l.split('\t')] for l in f]
     data = {}
     for l in indata:
-        j_linename, j_direc, cve_lineID, cve_linename = l
-        if (j_linename, j_direc) in data:
-            data[(j_linename, j_direc)].append((cve_lineID, cve_linename))
+        tt_line, tt_direc, cve_lineID, cve_linename = l
+        if (tt_line, tt_direc) in data:
+            data[(tt_line, tt_direc)].append((cve_lineID, cve_linename))
         else:
-            data[(j_linename, j_direc)] = [(cve_lineID, cve_linename)]
+            data[(tt_line, tt_direc)] = [(cve_lineID, cve_linename)]
 
     return data
 
@@ -51,6 +55,31 @@ def mk_railstation_data(fn, station_conv):
             data[k] = [stationname]
     return data
 
+def read_data_and_sort(rt_dirn):
+    ''' 運行表をすべて読んで、長いデータ順に並べる '''
+
+    ptn = re.compile(r'^(.+)_(.+)_runtables.txt$')
+    runtable_fn_list = [x for x in os.listdir(rt_dirn) if ptn.search(x)]
+
+    all_data = []
+    for fn in runtable_fn_list:
+
+        mob = ptn.search(fn)
+        tt_line, tt_direc = mob.group(1), mob.group(2)
+
+        with open(os.path.join(rt_dirn, fn), 'r', encoding='utf-8') as f:
+            _ = next(f)
+            data = [[x.strip() for x in l.split('\t')] for l in f]
+        # ファイル名から抜き出した tt路線, tt方面を各行の頭につける
+        all_data += [[tt_line, tt_direc, str(i)] + x for i, x in enumerate(data)]
+
+    # データ長い順にsort
+    print('sort start', ctime())
+    all_data.sort(key=lambda x: len(x), reverse=True)
+    print('sort end', ctime())
+
+    return all_data
+
 if __name__ == '__main__':
 
     psr = argparse.ArgumentParser()
@@ -64,11 +93,14 @@ if __name__ == '__main__':
     lineconv_fn = os.path.join(wkdirn, 'line_conv.txt')
     stalinedirec_fn = os.path.join(wkdirn, 'stationlinedirec_n.txt')
     railstation_fn = os.path.join(cvedirn, 'railstation_master.txt')
-    okfn = os.path.join(wkdirn, 'runtable_ok.txt')
-    osngfn = os.path.join(wkdirn, 'runtable_outside_ng.txt')
-    pasfn = os.path.join(wkdirn, 'runtable_pass.txt')
-    errfn = os.path.join(wkdirn, 'runtable_err.txt')
-    llfn = os.path.join(wkdirn, 'runtable_line_list.txt')
+    outdirn = os.path.join(wkdirn, 'runtable_chklist')
+    if not os.path.isdir(outdirn):
+        os.mkdir(outdirn)
+    okfn = os.path.join(outdirn, 'runtable_ok.txt')
+    osngfn = os.path.join(outdirn, 'runtable_outside_ng.txt')
+    pasfn = os.path.join(outdirn, 'runtable_pass.txt')
+    errfn = os.path.join(outdirn, 'runtable_err.txt')
+    llfn = os.path.join(outdirn, 'runtable_line_list.txt')
 
     # ジョルダン -> 所定 路線対応リスト取得 1:多
     # {(ジョルダン路線名, ジョルダン方面名): [(cve路線ID, cve路線名), ...], ...}
@@ -82,144 +114,129 @@ if __name__ == '__main__':
     # {(cve路線ID, cve路線名): ジョルダン駅名, ...}
     railstation_data = mk_railstation_data(railstation_fn, station_conv)
 
-    ptn = re.compile(r'^Line(\d+)$')
-    def revID(id):
-        ''' reverse_lineID を求める関数 '''
-        mob = ptn.search(id)
-        if not mob:
-            return None
-        no = int(mob.group(1))
-        if no % 2 == 0:
-            rev_no = no - 1
-        else:
-            rev_no = no + 1
-        return 'Line{:03}'.format(rev_no)
-
     # Lines instance
     lines = Lines()
-    for k, v in railstation_data.items():
-        lineID, linename = k
-        ptn_no = lines.add_line(lineID)
-        if ptn_no < 0:
-            continue
-        if ptn_no == 0:
-            lines.set_line_stations(lineID, linename, v)
-            lines.lines[lineID].reverse_lineID = revID(lineID)
-        else:
-            lines.set_line_stations(lineID, linename, v)
+    for (lineID, linename), stations in railstation_data.items():
+        lines.add_line(lineID, linename, stations)
 
-    # runtable 順次処理
-    ptn = re.compile(r'^(.+)_(.+)_runtables.txt$')
-    runtable_fn_list = [x for x in os.listdir(rt_dirn) if ptn.search(x)]
+    # 運行表データを全部読み、長いデータ順に
+    all_data = read_data_and_sort(rt_dirn)
 
+    ok_data, osng_data, pas_data, err_data = [], [], [], []
     vehicles = {}
 
-    with open(okfn, 'w', encoding='utf-8') as okf, \
-         open(osngfn, 'w', encoding='utf-8') as osngf, \
-         open(pasfn, 'w', encoding='utf-8') as pasf, \
-         open(errfn, 'w', encoding='utf-8') as errf:
+    # 1列車ずつ
+    for l in all_data:
 
-        header = ['tt路線', 'tt方面', '入力駅', 'tt時刻', 'tt文字列1', 'tt文字列2', \
-                  'rt路線', 'rt行き先', 'rt方面', '列車no', 'flg', 'cve路線ID', 'cve路線名']
-        okf.write('\t'.join(header) + '\n')
-        osngf.write('\t'.join(header + ['途中始発', '途中終着', '-> 各駅']) + '\n')
-        pasf.write('\t'.join(header + ['new路線ID', '途中始発', '途中終着', '-> 各駅']) + '\n')
-        errf.write('\t'.join(header + ['-> ng駅']) + '\n')
-        
-        for fn in runtable_fn_list:
+        written = False
+        tt_line, tt_direc, i, input_station, tt_time, tt_char1, tt_char2, \
+            rt_on_station, rt_line, rt_dest, rt_direc, vehicle_no, *rt_data = l
 
-            print(fn, ctime())
+        # 新幹線を飛ばす
+        #if any('新幹線' in x for x in [tt_char2, rt_line]):
+        #    continue
 
-            mob = ptn.search(fn)
-            j_linename, j_direc = mob.group(1), mob.group(2)
+        outdata = [tt_line, tt_direc, i, input_station, tt_time, tt_char1, tt_char2, \
+                    rt_on_station, rt_line, rt_dest, rt_direc, vehicle_no]
 
-            with open(os.path.join(rt_dirn, fn), 'r', encoding='utf-8') as f:
+        rt_data = [tuple(rt_data[i: i+3]) for i in range(0, len(rt_data), 3)]
+        rt_stations = [x[0] for x in rt_data]
 
-                _ = next(f)
-                # 1列車ずつ
-                for i, v in enumerate(f):
+        vehicle = Vehicle(rt_stations)
 
-                    written = False
-                    input_station, tt_time, tt_char1,  tt_char2, rt_line, rt_dest, rt_direc, \
-                        vehicle_no, *rt_data = [x.strip() for x in v.split('\t')]
+        ls_lines = line_conv[(tt_line, tt_direc)]
 
-                    # 新幹線を飛ばす
-                    if any('新幹線' in x for x in [tt_char2, rt_line]):
-                        continue
+        for lsl in ls_lines:
+            cve_lineID, cve_linename = lsl
 
-                    outdata = [j_linename, j_direc, input_station, tt_time, tt_char1, tt_char2, \
-                               rt_line, rt_dest, rt_direc, vehicle_no]
+            # 飛ばすファイル
+            if cve_lineID == '0' or cve_linename == '0':
+                flg = -1
+                break
 
-                    rt_data = [tuple(rt_data[i: i+3]) for i in range(0, len(rt_data), 3)]
-                    rt_stations = [x[0] for x in rt_data]
+            line_stations = lines.lines[cve_lineID].stations
 
-                    vehicle = Vehicle(rt_stations)
+            flg = vehicle.chk(line_stations)
+            
+            # OK
+            if flg == 0:  # or flg == 1:
+                vehicle.set_lineID(cve_lineID)
+                lines.lines[cve_lineID].vehicle_cnt += 1
+                outdata += [str(flg), cve_lineID, cve_linename]
+                ok_data.append(outdata)
+                written = True
+                break
+            # 外側にng駅
+            if flg == 7:
+                vehicle.set_lineID(cve_lineID)
+                lines.lines[cve_lineID].vehicle_cnt += 1
+                outdata += [str(flg), cve_lineID, cve_linename, vehicle.middle_start or '', vehicle.middle_end or '']
+                outdata += ['-> match'] + vehicle.match_stations
+                outdata += ['-> outside ng'] + vehicle.outside_ng_stations
+                osng_data.append(outdata)
+                written = True
+                break
+            # 通過駅あり
+            if flg == 8:
+                new_lineID = lines.add_new_higher(cve_lineID, vehicle.match_stations, vehicle.pass_stations)
+                vehicle.set_lineID(new_lineID)
+                lines.lines[new_lineID].vehicle_cnt += 1
+                outdata += [str(flg), cve_lineID, cve_linename, new_lineID]
+                outdata += [vehicle.middle_start or '', vehicle.middle_end or '']
+                outdata += ['-> match'] + vehicle.match_stations
+                outdata += ['-> pass'] + vehicle.pass_stations
+                if vehicle.outside_ng_stations:
+                    outdata += ['-> outside ng'] + vehicle.outside_ng_stations
+                pas_data.append(outdata)
+                written = True
+                break
+                            
+        # 飛ばすファイル
+        if flg < 0:
+            continue
 
-                    ls_lines = line_conv[(j_linename, j_direc)]
+        # エラー
+        if not written:  #flg > 90:
+            outdata += [str(flg), cve_lineID, cve_linename]
+            if vehicle.mid_ng_stations:
+                outdata += ['-> mid ng'] + vehicle.mid_ng_stations
+            if vehicle.outside_ng_stations:
+                outdata += ['-> outside ng'] + vehicle.outside_ng_stations
+            err_data.append(outdata)
 
-                    for lsl in ls_lines:
-                        cve_lineID, cve_linename = lsl
-
-                        # 飛ばすファイル
-                        if cve_lineID == '0' or cve_linename == '0':
-                            flg = -1
-                            break
-
-                        line_stations = lines.lines[cve_lineID].stations
-
-                        flg = vehicle.chk(line_stations)
-                        
-                        # OK
-                        if flg == 0:  # or flg == 1:
-                            lines.lines[cve_lineID].vehicle_cnt += 1
-                            outdata += [str(flg), cve_lineID, cve_linename]
-                            okf.write('\t'.join(outdata) + '\n')
-                            written = True
-                            break
-                        # 外側にng駅
-                        if flg == 7:
-                            lines.lines[cve_lineID].vehicle_cnt += 1
-                            outdata += [str(flg), cve_lineID, cve_linename, vehicle.middle_start or '', vehicle.middle_end or '']
-                            outdata += ['-> match'] + vehicle.match_stations
-                            outdata += ['-> outside ng'] + vehicle.outside_ng_stations
-                            osngf.write('\t'.join(outdata) + '\n')
-                            written = True
-                            break
-                        # 通過駅あり
-                        if flg == 8:
-                            new_lineID = lines.add_higher(cve_lineID, vehicle.match_stations, vehicle.pass_stations)
-                            outdata += [str(flg), cve_lineID, cve_linename, new_lineID]
-                            outdata += [vehicle.middle_start or '', vehicle.middle_end or '']
-                            outdata += ['-> match'] + vehicle.match_stations
-                            outdata += ['-> pass'] + vehicle.pass_stations
-                            if vehicle.outside_ng_stations:
-                                outdata += ['-> outside ng'] + vehicle.outside_ng_stations
-                            pasf.write('\t'.join(outdata) + '\n')
-                            written = True
-                            break
-                                        
-                    # 飛ばすファイル
-                    if flg < 0:
-                        continue
-
-                    # エラー
-                    if not written:  #flg > 90:
-                        outdata += [str(flg), cve_lineID, cve_linename]
-                        if vehicle.mid_ng_stations:
-                            outdata += ['-> mid ng'] + vehicle.mid_ng_stations
-                        if vehicle.outside_ng_stations:
-                            outdata += ['-> outside ng'] + vehicle.outside_ng_stations
-                        errf.write('\t'.join(outdata) + '\n')
-
-                    # vehicles ストア
-                    if j_linename in vehicles:
-                        if j_direc in vehicles[j_linename]:
-                            vehicles[j_linename][j_direc][i] = vehicle
-                        else:
-                            vehicles[j_linename][j_direc] = {i: vehicle}
-                    else:
-                        vehicles[j_linename] = {j_direc: {i: vehicle}}
+        # vehicles ストア
+        if tt_line in vehicles:
+            if tt_direc in vehicles[tt_line]:
+                vehicles[tt_line][tt_direc][i] = vehicle
+            else:
+                vehicles[tt_line][tt_direc] = {i: vehicle}
+        else:
+            vehicles[tt_line] = {tt_direc: {i: vehicle}}
     
+    # chklist 出力
+    def sortdata(data):
+        data.sort(key=lambda x: int(x[2]))
+        data.sort(key=lambda x: x[1])
+        data.sort(key=lambda x: x[0])
+        return data
+    ok_data = sortdata(ok_data)
+    osng_data = sortdata(osng_data)
+    pas_data = sortdata(pas_data)
+    err_data = sortdata(err_data)
+
+    header = ['tt路線', 'tt方面', 'i', '入力駅', 'tt時刻', 'tt文字列1', 'tt文字列2', \
+                'rt_on駅', 'rt路線', 'rt行き先', 'rt方面', '列車no', 'flg', 'cve路線ID', 'cve路線名']
+
+    def writedata(fn, data, header):
+        with open(fn, 'w', encoding='utf-8') as f:
+            f.write('\t'.join(header) + '\n')
+            for l in data:
+                f.write('\t'.join(l) + '\n')
+    writedata(okfn, ok_data, header)
+    writedata(osngfn, osng_data, header + ['途中始発', '途中終着', '-> 各駅'])
+    writedata(pasfn, pas_data, header + ['new路線ID', '途中始発', '途中終着', '-> 各駅'])
+    writedata(errfn, err_data, header + ['-> ng駅'])
+
     # 路線リスト
     line_list_data = lines.line_list()
 
