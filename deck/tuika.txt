@@ -2,3 +2,4 @@ WebSocketによって実現できること	クライアントのWebブラウザ�
 MTUとは	Maximum Transmission Unit<br>一つのフレームで送信できるIPパケットの最大長。イーサネットは1500バイト。	network
 MQTT	Message Queuing Telemetry Transport<br>工場の機械やセンサなどのM2MやIoT機器のメッセージ交換に適したプロトコル。	network
 OAuth	Open Authorization<br>複数のシステム（Webサービス）間でAPIを使って認証を連携させる仕組み。	network
+主なファイルシステム	<ul><li>NTFS; windows NT 系の標準ファイルシステム</li><li>FAT32: usbメモリの多くがこれでフォーマットされている</li></ul>	system
