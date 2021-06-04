@@ -1,0 +1,2 @@
+script�̏ꏊ
+../mkdata_from_ekidata.jp
