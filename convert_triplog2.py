@@ -42,8 +42,12 @@ class RailStation:
         self.st_nm2cd = {x[7]: x[6] for x in data}
         self.ln_id2nm = {x[0]: x[1] for x in data}
         self.ln_nm2id = {x[1]: x[0] for x in data}
+<<<<<<< HEAD
+        self.railstation = {ln: [x[6] for x in data if x[0]==ln] for ln in self.ln_id2nm.keys()}
+=======
         self.railstation = {ln: [x[6] for x in data if x[0]==ln] \
                             for ln in self.ln_id2nm.keys()}
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
 
 class RailFare:
     ''' (入場駅cd, 出場駅cd) -> 運賃 '''
@@ -58,6 +62,17 @@ class RailFare:
             else:
                 return x
         data = [[name_adj(x[0]), name_adj(x[1]), x[2]] for x in data]
+<<<<<<< HEAD
+        data = [x for x in data if all(st in railstation.st_nm2cd for st in (x[0], x[1]))]
+        self.railfare = {(railstation.st_nm2cd[x[0]], railstation.st_nm2cd[x[1]]): int(x[2]) \
+                         for x in data}
+
+    def get_railfare(self, o_stcd, d_stcd):
+        if (o_stcd, d_stcd) in self.railfare:
+            return self.railfare[(o_stcd, d_stcd)]
+        if (d_stcd, o_stcd) in self.railfare:
+            return self.railfare[(d_stcd, o_stcd)]
+=======
         data = [x for x in data \
                 if all(st in railstation.st_nm2cd for st in (x[0], x[1]))]
         self.railfare = {(railstation.st_nm2cd[x[0]], railstation.st_nm2cd[x[1]]) \
@@ -67,6 +82,7 @@ class RailFare:
         for k in [(o_stcd, d_stcd), (d_stcd, o_stcd)]:
             if k in self.railfare:
                 return self.railfare[k]
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
         return
 
 class RailOpKm:
@@ -74,11 +90,17 @@ class RailOpKm:
     def __init__(self, fn, enc, railstation):
         data = read_f(fn, enc)
         data.pop(0)
+<<<<<<< HEAD
+        data = [[x[0] + '_0'] + x[1:] for x in data] + [[x[0] + '_1'] + x[1:] for x in data]
+        data = [x for x in data if x[0] in railstation.ln_nm2id \
+                                and all(st in railstation.st_nm2cd for st in (x[1], x[2]))]
+=======
         data = [[x[0] + '_0'] + x[1:] for x in data] \
              + [[x[0] + '_1'] + x[1:] for x in data]
         data = [x for x in data \
                 if x[0] in railstation.ln_nm2id \
                 and all(st in railstation.st_nm2cd for st in (x[1], x[2]))]
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
         self.railopkm = {(railstation.ln_nm2id[x[0]], railstation.st_nm2cd[x[1]], \
                           railstation.st_nm2cd[x[2]]): float(x[3]) for x in data}
 
@@ -102,8 +124,14 @@ class Train:
 class TrainLog:
     def __init__(self, fn, enc):
         data = read_f(fn, enc)
+<<<<<<< HEAD
+        trainnos = set([x[1] for x in data])
+        self.trains = {trainno: Train(trainno, [x for x in data if x[1]==trainno]) \
+                       for trainno in trainnos}
+=======
         self.trains = {trainno: Train(trainno, [x for x in data if x[1]==trainno]) \
                        for trainno in set([x[1] for x in data])}
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
 
 def chk(trip, sections, railstation, trainlog, railfare, railopkm):
     '''
@@ -132,8 +160,12 @@ def chk(trip, sections, railstation, trainlog, railfare, railopkm):
             return 9, msg
 
         msg[3] = 'trainlog.txtにない'
+<<<<<<< HEAD
+        if not trainno in trainlog.trains or lineid != trainlog.trains[trainno].lineid:
+=======
         if not trainno in trainlog.trains \
           or lineid != trainlog.trains[trainno].lineid:
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
             msg[2] = '路線{0} 列車番号{1}'.format(lineid, trainno)
             return 9, msg
         if not dep_stcd in trainlog.trains[trainno].stations[: -1]:
@@ -146,9 +178,15 @@ def chk(trip, sections, railstation, trainlog, railfare, railopkm):
         # 営業キロ
         opkm = railopkm.get_railopkm(lineid, dep_stcd, arr_stcd)
         if not opkm:
+<<<<<<< HEAD
+            linenm = railstation.ln_id2nm[lineid]
+            dep_stnm, arr_stnm = railstation.st_cd2nm[dep_stcd], railstation.st_cd2nm[arr_stcd]
+            msg[2] = '{0} {1} {2}'.format(linenm, dep_stnm, arr_stnm)
+=======
             msg[2] = '{0} {1} {2}'.format(railstation.ln_id2nm[lineid], \
                                           railstation.st_cd2nm[dep_stcd], \
                                           railstation.st_cd2nm[arr_stcd])
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
             msg[3] = 'railopkm.txtにない'
             return 9, msg
         opkms.append(opkm)
@@ -165,8 +203,12 @@ def chk(trip, sections, railstation, trainlog, railfare, railopkm):
     # 運賃
     fare = railfare.get_railfare(o_st, d_st)
     if not fare:
+<<<<<<< HEAD
+        msg[2] = '入場駅{0} 出場駅{1}'.format(o_st, d_st)
+=======
         msg[2] = '{0} {1}'.format(railstation.st_cd2nm[o_st], \
                                   railstation.st_cd2nm[d_st])
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
         msg[3] = 'railfare.txtにない'
         return 9, msg
 
@@ -198,9 +240,15 @@ def chk(trip, sections, railstation, trainlog, railfare, railopkm):
         flg = 1
     else:
         flg, msg = 0, None
+<<<<<<< HEAD
 
     return flg, msg, o_time, d_time, fare, opkms
 
+=======
+
+    return flg, msg, o_time, d_time, fare, opkms
+
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
 def sec2char(sec, corr=True):
     ''' 秒を時刻の文字列に '''
     sc = sec % 60
@@ -216,6 +264,17 @@ def section_edit(train, dep_stcd, arr_stcd):
     arr_i = train.stations.index(arr_stcd)
 
     # 乗降時刻
+<<<<<<< HEAD
+    dep_sec = train.dep_sec[dep_i]
+    arr_sec = train.arr_sec[arr_i]
+    od_time = '{0}-{1}'.format(sec2char(dep_sec), sec2char(arr_sec))
+
+    # 区間情報
+    secinfo = ''.join(['-'.join([st, nst, str(pas)])  + ';' for st, nst, pas \
+                        in zip(train.stations[dep_i: arr_i], \
+                               train.stations[dep_i + 1: arr_i + 1], \
+                               train.pass_num[dep_i: arr_i])])
+=======
     od_time = '{0}-{1}'.format(sec2char(train.dep_sec[dep_i]), \
                                sec2char(train.arr_sec[arr_i]))
 
@@ -224,6 +283,7 @@ def section_edit(train, dep_stcd, arr_stcd):
                        in zip(train.stations[dep_i: arr_i], \
                               train.stations[dep_i + 1: arr_i + 1], \
                               train.pass_num[dep_i: arr_i])])
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
 
     return od_time, secinfo
 
@@ -253,7 +313,10 @@ if __name__ == '__main__':
     ofnf = os.path.join(outdirn, ofn)
     errfnf = os.path.join(outdirn, errfn)
 
+<<<<<<< HEAD
+=======
     # 読込
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
     railstation = RailStation(rs_fnf, rs_enc)
     railfare = RailFare(rf_fnf, rf_enc, railstation)
     railopkm = RailOpKm(rok_fnf, rok_enc, railstation)
@@ -269,8 +332,12 @@ if __name__ == '__main__':
             tripid, o_st, d_st, o_datetime, _, num, d_datetime, *_ = trip
             sections = [sections[i: i + 8] for i in range(0, len(sections), 8)]
 
+<<<<<<< HEAD
+            flg, msg, *values = chk(trip, sections, railstation, trainlog, railfare, railopkm)
+=======
             flg, msg, *values \
                 = chk(trip, sections, railstation, trainlog, railfare, railopkm)
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
 
             if flg != 0:
                 err_out.append(msg)
@@ -278,9 +345,12 @@ if __name__ == '__main__':
                     continue
             
             o_time, d_time, fare, opkms = values
+<<<<<<< HEAD
+=======
 
             outline = [tripid, o_st, d_st, o_time, d_time, str(num), str(fare), \
                        '0', '0', '0']
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
 
             # 各区間
             for s, opkm in zip(sections, opkms):
@@ -288,6 +358,14 @@ if __name__ == '__main__':
                 od_time, secinfo = section_edit(trainlog.trains[trainno], \
                                                 dep_stcd, arr_stcd)
 
+<<<<<<< HEAD
+            # 各区間
+            for s, opkm in zip(sections, opkms):
+                trainno, lineid, dep_stcd, _, arr_stcd, *_ = s
+                od_time, secinfo = section_edit(trainlog.trains[trainno], dep_stcd, arr_stcd)
+
+=======
+>>>>>>> 1b0b25d1bea6c3f58eaee261a5b528dd0b3d5e77
                 outline += [lineid, trainno, od_time, secinfo, str(opkm)]
 
             outf.write('\t'.join(outline) + '\n')
